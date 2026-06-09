@@ -32,6 +32,8 @@ A live dashboard that shows a car and reflects vehicle actions in real time, plu
 a panel that visualizes the challenge's differentiator: per-command **edge vs
 cloud** routing and latency.
 
+![LosRudos dashboard](docs/screenshot.png)
+
 ### Architecture
 
 ```
