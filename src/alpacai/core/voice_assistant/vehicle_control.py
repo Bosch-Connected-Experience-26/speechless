@@ -169,131 +169,182 @@ class SimulatedVehicleControl(VehicleCommandInterface):
 
 
 class KuksaVehicleControl(VehicleCommandInterface):
-    """Real vehicle control via KUKSA VSS (Vehicle Signal Specification)"""
+    """Real vehicle control via KUKSA VSS (Vehicle Signal Specification)
+    
+    Communicates with Eclipse Kuksa Databroker over gRPC.
+    Uses kuksa_client.grpc API to set/get vehicle signals.
+    """
+    
+    # VSS signal paths
+    VSS_SPEED = "Vehicle.Speed"
+    VSS_STEERING = "Vehicle.Chassis.SteeringWheel.Angle"
+    VSS_HAZARD = "Vehicle.Body.Lights.Hazard.IsSignaling"
+    VSS_TEMPERATURE = "Vehicle.Cabin.HVAC.AmbientAirTemperature"
+    VSS_VOLUME = "Vehicle.Cabin.Infotainment.Media.Volume"
+    VSS_BRAKE = "Vehicle.Chassis.Brake.PedalPosition"
     
     def __init__(self, kuksa_host: str = "localhost", kuksa_port: int = 55555):
         self.host = kuksa_host
         self.port = kuksa_port
-        self.client = None
-        self._initialize_client()
+        self._client = None
+        self._connected = False
+        # Local state mirror (for get_state when signals may not exist in databroker)
+        self.current_speed = 0.0
+        self.steering_angle = 0.0
+        self.temperature = 21.0
+        self.volume = 50
+        self.hazard_lights_on = False
+        self.command_count = 0
     
-    def _initialize_client(self):
-        """Initialize KUKSA client"""
+    def connect(self):
+        """Connect to the Kuksa databroker."""
         try:
             from kuksa_client.grpc import VSSClient
-            self.client = VSSClient(
-                host=self.host,
-                port=self.port,
-                insecure=True
-            )
-            logger.info(f"KUKSA client initialized: {self.host}:{self.port}")
+            self._client = VSSClient(host=self.host, port=self.port)
+            self._client.__enter__()
+            self._connected = True
+            logger.info(f"Connected to KUKSA databroker at {self.host}:{self.port}")
         except Exception as e:
-            logger.error(f"Failed to initialize KUKSA client: {e}")
-            self.client = None
+            logger.error(f"Failed to connect to KUKSA: {e}")
+            self._connected = False
+    
+    def disconnect(self):
+        """Disconnect from the Kuksa databroker."""
+        if self._client:
+            try:
+                self._client.__exit__(None, None, None)
+            except Exception:
+                pass
+            self._client = None
+            self._connected = False
+    
+    def _set_signal(self, path: str, value):
+        """Set a VSS signal value in the databroker."""
+        from kuksa_client.grpc import Datapoint, DataEntry, EntryUpdate, Field
+        updates = (EntryUpdate(DataEntry(
+            path=path,
+            value=Datapoint(value=value),
+        ), (Field.VALUE,)),)
+        self._client.set(updates)
+    
+    def _get_signal(self, path: str):
+        """Get a VSS signal value from the databroker."""
+        values = self._client.get_current_values([path])
+        dp = values.get(path)
+        if dp and dp.value is not None:
+            return dp.value
+        return None
     
     async def accelerate(self, speed_kmh: float) -> Dict[str, Any]:
         """Send acceleration command via KUKSA"""
+        self.current_speed = min(speed_kmh, 200)
+        self.command_count += 1
         try:
-            if self.client:
-                self.client.set_current_value(
-                    "Vehicle.Speed",
-                    speed_kmh
-                )
-                return {"status": "success", "target_speed": speed_kmh}
+            if self._connected:
+                self._set_signal(self.VSS_SPEED, self.current_speed)
+                logger.info(f"[KUKSA] Set {self.VSS_SPEED} = {self.current_speed}")
+                return {"status": "success", "target_speed": self.current_speed}
             else:
-                return {"status": "error", "message": "KUKSA not available"}
+                return {"status": "error", "message": "KUKSA not connected"}
         except Exception as e:
             logger.error(f"Accelerate error: {e}")
             return {"status": "error", "message": str(e)}
     
     async def brake(self, force: float = 0.5) -> Dict[str, Any]:
         """Send brake command via KUKSA"""
+        deceleration = force * 50
+        self.current_speed = max(0, self.current_speed - deceleration)
+        self.command_count += 1
         try:
-            if self.client:
-                self.client.set_current_value(
-                    "Vehicle.Brake.Pedal.Position",
-                    force
-                )
-                return {"status": "success", "brake_force": force}
+            if self._connected:
+                self._set_signal(self.VSS_BRAKE, force * 100)  # 0-100 percent
+                self._set_signal(self.VSS_SPEED, self.current_speed)
+                logger.info(f"[KUKSA] Brake force={force}, speed={self.current_speed}")
+                return {"status": "success", "brake_force": force, "current_speed": self.current_speed}
             else:
-                return {"status": "error", "message": "KUKSA not available"}
+                return {"status": "error", "message": "KUKSA not connected"}
         except Exception as e:
             logger.error(f"Brake error: {e}")
             return {"status": "error", "message": str(e)}
     
     async def turn(self, angle: float) -> Dict[str, Any]:
         """Send steering command via KUKSA"""
+        self.steering_angle = max(-180, min(180, angle))
+        self.command_count += 1
         try:
-            if self.client:
-                self.client.set_current_value(
-                    "Vehicle.Cabin.SteeringWheel.Angle",
-                    angle
-                )
-                return {"status": "success", "steering_angle": angle}
+            if self._connected:
+                self._set_signal(self.VSS_STEERING, self.steering_angle)
+                logger.info(f"[KUKSA] Set {self.VSS_STEERING} = {self.steering_angle}")
+                return {"status": "success", "steering_angle": self.steering_angle}
             else:
-                return {"status": "error", "message": "KUKSA not available"}
+                return {"status": "error", "message": "KUKSA not connected"}
         except Exception as e:
             logger.error(f"Steering error: {e}")
             return {"status": "error", "message": str(e)}
     
     async def hazard_lights(self, enable: bool) -> Dict[str, Any]:
         """Send hazard lights command via KUKSA"""
+        self.hazard_lights_on = enable
+        self.command_count += 1
         try:
-            if self.client:
-                self.client.set_current_value(
-                    "Vehicle.Body.Lights.Hazard.IsOn",
-                    enable
-                )
+            if self._connected:
+                self._set_signal(self.VSS_HAZARD, enable)
+                logger.info(f"[KUKSA] Set {self.VSS_HAZARD} = {enable}")
                 return {"status": "success", "hazard_lights": enable}
             else:
-                return {"status": "error", "message": "KUKSA not available"}
+                return {"status": "error", "message": "KUKSA not connected"}
         except Exception as e:
             logger.error(f"Hazard lights error: {e}")
             return {"status": "error", "message": str(e)}
     
     async def set_temperature(self, celsius: float) -> Dict[str, Any]:
         """Set HVAC temperature via KUKSA"""
+        self.temperature = max(16, min(32, celsius))
+        self.command_count += 1
         try:
-            if self.client:
-                self.client.set_current_value(
-                    "Vehicle.Cabin.HVAC.Station.Row1.Temperature",
-                    celsius
-                )
-                return {"status": "success", "temperature": celsius}
+            if self._connected:
+                self._set_signal(self.VSS_TEMPERATURE, self.temperature)
+                logger.info(f"[KUKSA] Set {self.VSS_TEMPERATURE} = {self.temperature}")
+                return {"status": "success", "temperature": self.temperature}
             else:
-                return {"status": "error", "message": "KUKSA not available"}
+                return {"status": "error", "message": "KUKSA not connected"}
         except Exception as e:
             logger.error(f"Temperature error: {e}")
             return {"status": "error", "message": str(e)}
     
     async def set_volume(self, level: int) -> Dict[str, Any]:
         """Set audio volume via KUKSA"""
+        self.volume = max(0, min(100, level))
+        self.command_count += 1
         try:
-            if self.client:
-                self.client.set_current_value(
-                    "Vehicle.Cabin.Infotainment.Media.Volume",
-                    level
-                )
-                return {"status": "success", "volume": level}
+            if self._connected:
+                self._set_signal(self.VSS_VOLUME, self.volume)
+                logger.info(f"[KUKSA] Set {self.VSS_VOLUME} = {self.volume}")
+                return {"status": "success", "volume": self.volume}
             else:
-                return {"status": "error", "message": "KUKSA not available"}
+                return {"status": "error", "message": "KUKSA not connected"}
         except Exception as e:
             logger.error(f"Volume error: {e}")
             return {"status": "error", "message": str(e)}
     
-    async def get_state(self) -> Dict[str, Any]:
-        """Get vehicle state from KUKSA"""
-        try:
-            if not self.client:
-                return {"status": "error", "message": "KUKSA not available"}
-            
-            state = {
-                "speed": self.client.get_current_value("Vehicle.Speed"),
-                "steering_angle": self.client.get_current_value("Vehicle.Cabin.SteeringWheel.Angle"),
-                "temperature": self.client.get_current_value("Vehicle.Cabin.HVAC.Station.Row1.Temperature"),
-                "volume": self.client.get_current_value("Vehicle.Cabin.Infotainment.Media.Volume"),
-            }
-            return state
-        except Exception as e:
-            logger.error(f"Get state error: {e}")
-            return {"status": "error", "message": str(e)}
+    def get_state(self) -> Dict[str, Any]:
+        """Get current vehicle state (from local mirror + databroker)"""
+        state = {
+            "speed": self.current_speed,
+            "steering_angle": self.steering_angle,
+            "temperature": self.temperature,
+            "volume": self.volume,
+            "hazard_lights": self.hazard_lights_on,
+            "state": "moving" if self.current_speed > 0 else "idle",
+            "commands_executed": self.command_count,
+            "kuksa_connected": self._connected,
+        }
+        # Try to read live values from databroker
+        if self._connected:
+            try:
+                speed_val = self._get_signal(self.VSS_SPEED)
+                if speed_val is not None:
+                    state["speed"] = speed_val
+            except Exception:
+                pass
+        return state

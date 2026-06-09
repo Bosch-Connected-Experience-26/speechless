@@ -29,8 +29,11 @@ from voice_assistant.hybrid_router import (
     HybridVoiceRouter, EdgeCommandExecutor, CloudCommandExecutor,
     NetworkMonitor, VoiceCommand, CommandSafetyCriticality
 )
-from voice_assistant.vehicle_control import SimulatedVehicleControl
+from voice_assistant.vehicle_control import SimulatedVehicleControl, KuksaVehicleControl
 from voice_assistant.intent_parser import VoiceIntentParser
+
+# Check for --kuksa flag
+USE_KUKSA = "--kuksa" in sys.argv
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,7 +49,9 @@ dashboard_state = {
     "logs": [],
     "statistics": {},
     "sensor_history": {"speed": [], "temperature": [], "steering": []},
-    "routing_history": []
+    "routing_history": [],
+    "kuksa_mode": USE_KUKSA,
+    "kuksa_connected": False
 }
 
 max_logs = 50
@@ -84,7 +89,20 @@ async def run_demo_scenario():
     demo_running = True
     
     # Initialize components
-    vehicle = SimulatedVehicleControl()
+    if USE_KUKSA:
+        vehicle = KuksaVehicleControl(kuksa_host="localhost", kuksa_port=55555)
+        vehicle.connect()
+        if not vehicle._connected:
+            add_log("ERROR", "KUKSA connection failed, falling back to simulation")
+            dashboard_state["kuksa_connected"] = False
+            vehicle = SimulatedVehicleControl()
+        else:
+            dashboard_state["kuksa_connected"] = True
+            add_log("KUKSA", "Connected to databroker at localhost:55555")
+    else:
+        vehicle = SimulatedVehicleControl()
+        add_log("INFO", "Running in simulation mode (use --kuksa for real databroker)")
+    
     network = NetworkMonitor()
     parser = VoiceIntentParser()
     
@@ -156,6 +174,13 @@ async def run_demo_scenario():
             "latency_ms": result.latency_ms,
             "success": result.success
         })
+        
+        # Log Kuksa signal write if connected
+        if USE_KUKSA and dashboard_state["kuksa_connected"]:
+            add_log("KUKSA", f"VSS signal written: {command.intent} → databroker", {
+                "intent": command.intent,
+                "executed_on": result.executed_on.value
+            })
         
         dashboard_state["routing_history"].append(dashboard_state["routing_decision"])
         if len(dashboard_state["routing_history"]) > 20:
@@ -298,6 +323,20 @@ DASHBOARD_HTML = """
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
+        }
+        
+        .vss-tag {
+            display: none;
+            font-size: 9px;
+            font-weight: bold;
+            color: #fff;
+            background: #00897B;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 8px;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+            animation: pulse 2s infinite;
         }
         
         .demo-button {
@@ -527,6 +566,7 @@ DASHBOARD_HTML = """
         .log-entry.VOICE { border-left-color: #4CAF50; }
         .log-entry.ROUTING { border-left-color: #FF9800; }
         .log-entry.NETWORK { border-left-color: #9C27B0; }
+        .log-entry.KUKSA { border-left-color: #00897B; background: #e0f2f1; }
         .log-entry.ERROR { border-left-color: #F44336; }
         
         .log-time {
@@ -592,6 +632,14 @@ DASHBOARD_HTML = """
                 <p style="color: #666; margin: 0;">Intelligent Edge-Cloud Vehicle Control</p>
             </div>
             <div class="header-info">
+                <div class="status-badge" id="kuksa-badge" style="display: none; background: #e8f5e9; border: 1px solid #4caf50;">
+                    <span style="font-size: 14px;">🔌</span>
+                    <span id="kuksa-info" style="color: #2e7d32; font-weight: bold;">KUKSA Connected</span>
+                </div>
+                <div class="status-badge" id="sim-badge" style="background: #fff3e0; border: 1px solid #ff9800;">
+                    <span style="font-size: 14px;">🧪</span>
+                    <span style="color: #e65100; font-weight: bold;">Simulation</span>
+                </div>
                 <div class="status-badge">
                     <span class="status-dot connected" id="network-status"></span>
                     <span id="network-info">Connected: 50ms</span>
@@ -721,22 +769,39 @@ DASHBOARD_HTML = """
                 <div class="metric">
                     <label>Current Speed:</label>
                     <value id="metric-speed">0 km/h</value>
+                    <span class="vss-tag">VSS</span>
                 </div>
                 <div class="metric">
                     <label>Steering Angle:</label>
                     <value id="metric-steering">0°</value>
+                    <span class="vss-tag">VSS</span>
                 </div>
                 <div class="metric">
                     <label>Temperature:</label>
                     <value id="metric-temp">21°C</value>
+                    <span class="vss-tag">VSS</span>
                 </div>
                 <div class="metric">
                     <label>Volume:</label>
                     <value id="metric-volume">50%</value>
+                    <span class="vss-tag">VSS</span>
                 </div>
                 <div class="metric">
                     <label>Hazard Lights:</label>
                     <value id="metric-hazard">OFF</value>
+                    <span class="vss-tag">VSS</span>
+                </div>
+                <div id="kuksa-signal-panel" style="display: none; margin-top: 15px; padding: 12px; background: linear-gradient(135deg, #e0f2f1, #b2dfdb); border-radius: 8px; border: 1px solid #00897B;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span style="font-size: 16px;">🔌</span>
+                        <span style="font-weight: bold; color: #00695c; font-size: 13px;">KUKSA SIGNAL OUTPUT</span>
+                        <span id="kuksa-pulse" style="width: 8px; height: 8px; border-radius: 50%; background: #00897B; animation: pulse 1.5s infinite;"></span>
+                    </div>
+                    <div style="font-family: monospace; font-size: 11px; color: #004d40;" id="kuksa-last-signal">Waiting for commands...</div>
+                    <div style="margin-top: 6px; font-size: 11px; color: #00796b;">
+                        Databroker: <span id="kuksa-host-label">localhost:55555</span> &nbsp;|&nbsp; 
+                        Signals written: <span id="kuksa-signal-count" style="font-weight: bold;">0</span>
+                    </div>
                 </div>
             </div>
             
@@ -845,6 +910,33 @@ DASHBOARD_HTML = """
             try {
                 const response = await fetch('/api/state');
                 const state = await response.json();
+                
+                // Kuksa/Simulation badge
+                if (state.kuksa_mode) {
+                    document.getElementById('kuksa-badge').style.display = 'flex';
+                    document.getElementById('sim-badge').style.display = 'none';
+                    document.getElementById('kuksa-signal-panel').style.display = 'block';
+                    if (state.kuksa_connected) {
+                        document.getElementById('kuksa-info').textContent = 'KUKSA Connected';
+                        document.getElementById('kuksa-badge').style.borderColor = '#4caf50';
+                    } else {
+                        document.getElementById('kuksa-info').textContent = 'KUKSA Disconnected';
+                        document.getElementById('kuksa-badge').style.borderColor = '#f44336';
+                        document.getElementById('kuksa-badge').style.background = '#ffebee';
+                    }
+                    // Update Kuksa signal panel
+                    const kuksaLogs = (state.logs || []).filter(l => l.level === 'KUKSA');
+                    document.getElementById('kuksa-signal-count').textContent = kuksaLogs.length;
+                    if (kuksaLogs.length > 0) {
+                        document.getElementById('kuksa-last-signal').textContent = kuksaLogs[0].message;
+                    }
+                    document.querySelectorAll('.vss-tag').forEach(el => el.style.display = 'inline');
+                } else {
+                    document.getElementById('kuksa-badge').style.display = 'none';
+                    document.getElementById('sim-badge').style.display = 'flex';
+                    document.getElementById('kuksa-signal-panel').style.display = 'none';
+                    document.querySelectorAll('.vss-tag').forEach(el => el.style.display = 'none');
+                }
                 
                 // Vehicle State
                 if (state.vehicle_state) {
@@ -1098,6 +1190,11 @@ if __name__ == '__main__':
     print("  VISUAL HYBRID VOICE ASSISTANT DASHBOARD")
     print("="*70)
     print("\n🌐 Dashboard running at: http://localhost:5001")
-    print("📊 Open this URL in your browser to see real-time visualization\n")
+    print("📊 Open this URL in your browser to see real-time visualization")
+    if USE_KUKSA:
+        print("🔌 KUKSA mode enabled — writing to databroker on localhost:55555")
+    else:
+        print("💡 Use --kuksa flag to connect to real KUKSA databroker")
+    print()
     
     app.run(host='0.0.0.0', port=5001, debug=False)

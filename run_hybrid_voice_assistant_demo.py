@@ -41,8 +41,12 @@ from voice_assistant.hybrid_router import (
     CommandSafetyCriticality,
     ExecutionLocation
 )
-from voice_assistant.vehicle_control import SimulatedVehicleControl
+from voice_assistant.vehicle_control import SimulatedVehicleControl, KuksaVehicleControl
 from voice_assistant.intent_parser import VoiceIntentParser
+
+
+# Check for --kuksa flag
+USE_KUKSA = "--kuksa" in sys.argv
 
 
 class MockCloudService:
@@ -75,7 +79,20 @@ async def run_demo():
     
     # Initialize components
     print("📋 Initializing components...")
-    vehicle = SimulatedVehicleControl()
+    
+    if USE_KUKSA:
+        print("🔌 Connecting to KUKSA databroker (localhost:55555)...")
+        vehicle = KuksaVehicleControl(kuksa_host="localhost", kuksa_port=55555)
+        vehicle.connect()
+        if vehicle._connected:
+            print("✅ Connected to KUKSA databroker!")
+        else:
+            print("⚠️  KUKSA connection failed, falling back to simulation")
+            vehicle = SimulatedVehicleControl()
+    else:
+        vehicle = SimulatedVehicleControl()
+        print("   Using simulated vehicle (use --kuksa flag for real databroker)")
+    
     network = NetworkMonitor()
     cloud_service = MockCloudService()
     

@@ -1,2 +1,4 @@
 flask>=2.0
 pyttsx3
+kuksa-client>=0.4
+httpx>=0.27
