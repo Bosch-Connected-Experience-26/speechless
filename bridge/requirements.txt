@@ -1,0 +1,9 @@
+# Bridge runtime deps.
+# fastapi + uvicorn are the only hard requirements — the bridge runs as a pure
+# in-memory simulator with just these (D3). kuksa-client is OPTIONAL: install it
+# only to bridge a real Eclipse Kuksa databroker (set KUKSA_ADDRESS to activate).
+fastapi>=0.110
+uvicorn[standard]>=0.29
+
+# Optional — uncomment (or `pip install kuksa-client`) for real Kuksa integration:
+# kuksa-client>=0.4

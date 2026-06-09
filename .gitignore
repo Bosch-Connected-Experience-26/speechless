@@ -3,6 +3,16 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Clippy local run state (not committed)
+.clippy/
+# Local venvs (probe used to ground the kuksa-client API; bridge used to verify)
+.venv-kuksa-probe/
+.venv-bridge/
+
+# Node / dashboard
+node_modules/
+dashboard/dist/
+
 # C extensions
 *.so
 
