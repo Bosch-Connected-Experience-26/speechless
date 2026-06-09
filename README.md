@@ -16,9 +16,9 @@
 
 ## **Challenge**
 
-**SynergyHarvester** — Cognitive Platforms (Health, Defense, Home & Support)
+**Voice Assistant for Vehicle Control** — Future Mobility (Automotive)
 
-Build a smart data harmonization platform to unify post-merger datasets across product portfolios and instantly unlock hidden cross-selling opportunities.
+Build a hybrid AI-powered in-vehicle voice assistant that intelligently routes commands between edge and cloud systems to enable fast, reliable, real-time vehicle control.
 
 ## **Core Idea**
 
