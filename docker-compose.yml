@@ -1,0 +1,17 @@
+services:
+  kuksa-databroker:
+    image: ghcr.io/eclipse-kuksa/kuksa-databroker:0.4.4
+    container_name: kuksa-databroker
+    ports:
+      - "55555:55555"
+    volumes:
+      - vss-data:/vss
+    healthcheck:
+      test: ["CMD", "grpc_health_probe", "-addr=localhost:55555"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  vss-data:

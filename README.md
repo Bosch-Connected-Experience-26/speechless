@@ -4,7 +4,7 @@
 
 **LosRudos** — *Voice-driven intelligence for the road ahead*
 
-> 💡 **Tip:** Create a sheet of paper with your team name on the desk so mentors and organizers can find you easily! 
+> 💡 **Tip:** Create a sheet of paper with your team name on the desk so mentors and organizers can find you easily!
 
 ## **Team Members**
 
