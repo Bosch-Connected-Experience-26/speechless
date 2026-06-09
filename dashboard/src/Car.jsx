@@ -11,6 +11,7 @@ export default function Car({ signals, onSet }) {
   const indL = on(signals[P.indLeft]) || on(signals[P.hazard]);
   const indR = on(signals[P.indRight]) || on(signals[P.hazard]);
   const lockedD = on(signals[P.lockDriver]);
+  const lockedP = on(signals[P.lockPass]);
   const doorOpen = on(signals[P.doorDriverOpen]);
   const winPos = Math.min(Math.max(Number(signals[P.windowDriver] ?? 0), 0), 100); // open %
   const glassH = 150 * (1 - winPos / 100); // closed window = full glass
@@ -97,16 +98,22 @@ export default function Car({ signals, onSet }) {
         <rect x="144" y="410" width="30" height="14" rx="6" />
       </g>
 
-      {/* lock badge (reflects driver lock) */}
-      <g
-        className={`lock ${lockedD ? "locked" : "unlocked"}`}
-        onClick={() => toggle(P.lockDriver, signals[P.lockDriver])}
-        transform="translate(116 232)"
-      >
-        <title>Doors {lockedD ? "locked" : "unlocked"} — click to toggle</title>
-        <rect className="lock-body" x="0" y="12" width="28" height="22" rx="4" />
-        <path className="lock-shackle" d={lockedD ? "M6 12 v-6 a8 8 0 0 1 16 0 v6" : "M6 12 v-6 a8 8 0 0 1 16 0"} />
-      </g>
+      {/* lock badges — driver (left) and passenger (right), each clickable */}
+      {[
+        { x: 92, locked: lockedD, path: P.lockDriver, label: "Driver door" },
+        { x: 142, locked: lockedP, path: P.lockPass, label: "Passenger door" },
+      ].map(({ x, locked, path, label }) => (
+        <g
+          key={path}
+          className={`lock ${locked ? "locked" : "unlocked"}`}
+          onClick={() => toggle(path, signals[path])}
+          transform={`translate(${x} 232)`}
+        >
+          <title>{label} {locked ? "locked" : "unlocked"} — click to toggle</title>
+          <rect className="lock-body" x="0" y="12" width="24" height="20" rx="4" />
+          <path className="lock-shackle" d={locked ? "M5 12 v-5 a7 7 0 0 1 14 0 v5" : "M5 12 v-5 a7 7 0 0 1 14 0"} />
+        </g>
+      ))}
 
       {/* front marker */}
       <text className="front-label" x="130" y="34" textAnchor="middle">FRONT</text>

@@ -15,13 +15,14 @@ Run:
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import time
 from contextlib import asynccontextmanager
 from typing import Any, Optional
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -198,7 +199,9 @@ async def post_command(cmd: CommandIn) -> dict:
             source="voice",
         )
     except UnknownSignal:
-        return {"ok": False, "error": f"unknown signal: {cmd.path}"}
+        # 4xx, not a 200 body flag (D10): a client using raise_for_status()
+        # must see the rejection as a failure, not a success.
+        raise HTTPException(status_code=422, detail=f"unknown signal: {cmd.path}")
     return {"ok": True, "bridge_ms": event["bridge_ms"], "event": event}
 
 
@@ -211,11 +214,17 @@ async def ws_endpoint(ws: WebSocket) -> None:
     await ws.send_json({"type": "snapshot", "signals": store.snapshot(), "ts": now_ms()})
     try:
         while True:
-            msg = await ws.receive_json()
+            raw = await ws.receive_text()
+            try:
+                msg = json.loads(raw)
+            except (json.JSONDecodeError, ValueError):
+                # A malformed frame is surfaced and the socket lives on (D10).
+                await ws.send_json({"type": "error", "error": "invalid JSON frame"})
+                continue
             await _handle_ws_message(ws, msg)
     except WebSocketDisconnect:
         manager.disconnect(ws)
-    except Exception:  # noqa: BLE001 - never let one bad frame kill the socket (D10)
+    except Exception:  # noqa: BLE001 - last-resort guard; never crash the server loop
         logger.exception("websocket handler error")
         manager.disconnect(ws)
 

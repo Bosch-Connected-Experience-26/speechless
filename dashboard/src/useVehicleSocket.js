@@ -18,6 +18,7 @@ export function useVehicleSocket() {
   const [status, setStatus] = useState("connecting"); // connecting | open | closed
   const wsRef = useRef(null);
   const retryRef = useRef(null);
+  const idRef = useRef(0); // monotonic command id — stable React keys (no ts collision)
 
   const connect = useCallback(() => {
     const ws = new WebSocket(wsUrl());
@@ -39,7 +40,8 @@ export function useVehicleSocket() {
         setSignals((s) => ({ ...s, [msg.path]: msg.value }));
       } else if (msg.type === "command") {
         setSignals((s) => ({ ...s, [msg.path]: msg.value }));
-        setCommands((c) => [{ ...msg, id: `${msg.ts}-${msg.path}` }, ...c].slice(0, MAX_COMMANDS));
+        const id = ++idRef.current;
+        setCommands((c) => [{ ...msg, id }, ...c].slice(0, MAX_COMMANDS));
       }
       // `error` frames are non-fatal; surfaced via console for debugging.
       else if (msg.type === "error") {
