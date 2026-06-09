@@ -50,6 +50,11 @@ export function useVehicleSocket() {
     };
 
     ws.onclose = () => {
+      // Only reconnect if THIS socket is still the active one. On a real
+      // unmount (and on React StrictMode's dev double-mount) wsRef is cleared
+      // or replaced, so a superseded socket never spawns a stray reconnect —
+      // which would otherwise leave two sockets feeding duplicate commands.
+      if (wsRef.current !== ws) return;
       setStatus("closed");
       retryRef.current = setTimeout(connect, 1500);
     };
@@ -60,7 +65,9 @@ export function useVehicleSocket() {
     connect();
     return () => {
       clearTimeout(retryRef.current);
-      wsRef.current?.close();
+      const ws = wsRef.current;
+      wsRef.current = null; // signal onclose not to reconnect
+      ws?.close();
     };
   }, [connect]);
 
