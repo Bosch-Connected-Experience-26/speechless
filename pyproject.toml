@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hybrid-voice-assistant"
+version = "1.0.0"
+description = "Hybrid AI-powered in-vehicle voice assistant with edge-cloud routing"
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=2.0",
+    "pyttsx3",
+]
+
+[project.optional-dependencies]
+cloud = [
+    "google-cloud-texttospeech",
+    "google-cloud-speech",
+    "vertexai",
+]
+vehicle = [
+    "kuksa-client",
+]
+full = [
+    "google-cloud-texttospeech",
+    "google-cloud-speech",
+    "vertexai",
+    "kuksa-client",
+    "openai-whisper",
+    "ultralytics",
+    "opencv-python",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
