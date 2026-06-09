@@ -2,45 +2,24 @@
 
 ## **Team Name / Tagline**
 
-*[Brief catchy tagline or team name]*
+**LosRudos** — *Voice-driven intelligence for the road ahead*
 
 > 💡 **Tip:** Create a sheet of paper with your team name on the desk so mentors and organizers can find you easily! 
-
-*[Feel free to include a picture representing your team here]*
 
 ## **Team Members**
 
 | Name | GitHub Handle | Role(s) |
 | :--- | :--- | :--- |
-| Firstname Lastname | [@username](https://github.com/username) | e.g., Backend, Frontend, UX, Pitcher |
-| | | |
-| | | |
-| | | |
+| | [@kronos-cm](https://github.com/kronos-cm) | |
+| | [@jesusalc](https://github.com/jesusalc) | |
+| | [@carloshled](https://github.com/carloshled) | |
 
 ## **Challenge**
 
-*[Which challenge have you decided to compete for?]*
+**SynergyHarvester** — Cognitive Platforms (Health, Defense, Home & Support)
+
+Build a smart data harmonization platform to unify post-merger datasets across product portfolios and instantly unlock hidden cross-selling opportunities.
 
 ## **Core Idea**
 
-*[What is your rough solution idea?]*
-
-<br>
-
-*[Sketch your technical architecture or data flow to help understand your technical approach. You can edit the mermaid chart below:]*
-
-```mermaid
-graph LR;
-    subgraph Edge / Hardware
-        Sensor[IoT Sensor / Device] -->|MQTT| Gateway[Edge Gateway]
-    end
-    
-    subgraph Cloud / Backend
-        Gateway -->|Data Ingestion| API[AWS API Gateway]
-        API <--> DB[(MongoDB)]
-        API <--> ML[AI/ML Model]
-    end
-    
-    subgraph Client / UI
-        API -->|REST / GraphQL| App[Web / Mobile Dashboard]
-    end
+A modular voice-enabled solution that is a cutting-edge integration of AI technologies with automotive safety systems, designed to redefine the driving experience. Fully integrated with Kuksa Vehicle API.
