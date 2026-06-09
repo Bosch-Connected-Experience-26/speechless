@@ -83,7 +83,7 @@ class TestLoadConfig:
             "SPEECHLESS_JETSON_URL": "http://jetson-nano:8080/v1",
         }):
             config = load_config()
-        assert config.lmstudio_url == "http://devbox:1234/v1"
+        assert config.edge_lm_url == "http://devbox:1234/v1"
         assert config.jetson_url == "http://jetson-nano:8080/v1"
 
     def test_whisper_model_size_from_env(self):

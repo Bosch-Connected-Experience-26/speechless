@@ -1,78 +1,87 @@
-"""Configuration loading for the Speechless voice assistant.
-
-Loads configuration from environment variables with sensible defaults.
-Environment variable names use the SPEECHLESS_ prefix and uppercase field names.
-"""
-
-from __future__ import annotations
+"""Configuration loading from environment variables with sensible defaults."""
 
 import os
 
 from speechless.models import AppConfig
 
 
+def _get_env(primary: str, *fallbacks: str, default: str = "") -> str:
+    """Get an environment variable, trying primary key first then fallbacks."""
+    value = os.environ.get(primary)
+    if value is not None:
+        return value
+    for fallback in fallbacks:
+        value = os.environ.get(fallback)
+        if value is not None:
+            return value
+    return default
+
+
 def load_config() -> AppConfig:
     """Load application configuration from environment variables.
 
-    Environment variables are mapped as follows:
-        SPEECHLESS_EDGE_TARGET        -> edge_target (default: "lmstudio")
-        SPEECHLESS_LMSTUDIO_URL       -> lmstudio_url (default: "http://localhost:1234/v1")
-        SPEECHLESS_JETSON_URL         -> jetson_url (default: "http://jetson-device:8080/v1")
-        SPEECHLESS_EDGE_MODEL_NAME    -> edge_model_name (default: "local-model")
-        SPEECHLESS_BEDROCK_PROFILE    -> bedrock_profile (default: "losrudos")
-        SPEECHLESS_BEDROCK_MODEL_ID   -> bedrock_model_id (default: "anthropic.claude-3-haiku-20240307-v1:0")
-        SPEECHLESS_BEDROCK_REGION     -> bedrock_region (default: "us-east-1")
-        SPEECHLESS_PING_URL           -> ping_url (default: "http://connectivitycheck.gstatic.com/generate_204")
-        SPEECHLESS_PING_INTERVAL      -> ping_interval_seconds (default: 3.0)
-        SPEECHLESS_KUKSA_HOST         -> kuksa_host (default: "localhost")
-        SPEECHLESS_KUKSA_PORT         -> kuksa_port (default: 55555)
-        SPEECHLESS_CRITICAL_HR_THRESHOLD -> critical_hr_threshold (default: 180)
-        SPEECHLESS_HR_SAMPLING_INTERVAL  -> hr_sampling_interval (default: 5.0)
-        SPEECHLESS_WHISPER_MODEL_SIZE    -> whisper_model_size (default: "base")
-        SPEECHLESS_STT_CONFIDENCE_THRESHOLD -> stt_confidence_threshold (default: 0.7)
-        SPEECHLESS_CLASSIFICATION_THRESHOLD -> classification_confidence_threshold (default: 0.6)
+    Environment variables (all prefixed with SPEECHLESS_):
+        SPEECHLESS_EDGE_TARGET: Edge LLM target ("lmstudio" or "jetson")
+        SPEECHLESS_EDGE_LM_URL / SPEECHLESS_LMSTUDIO_URL: Edge LLM endpoint URL (LM Studio default)
+        SPEECHLESS_JETSON_URL: Jetson TensorRT endpoint URL
+        SPEECHLESS_EDGE_MODEL_NAME: Edge model name for API calls
+        SPEECHLESS_BEDROCK_PROFILE: AWS CLI profile name for Bedrock
+        SPEECHLESS_BEDROCK_MODEL_ID / SPEECHLESS_BEDROCK_MODEL: AWS Bedrock model ID
+        SPEECHLESS_BEDROCK_REGION: AWS region for Bedrock
+        SPEECHLESS_PING_URL: URL for connectivity checks
+        SPEECHLESS_PING_INTERVAL: Connectivity ping interval in seconds
+        SPEECHLESS_KUKSA_HOST: Kuksa databroker hostname
+        SPEECHLESS_KUKSA_PORT: Kuksa databroker gRPC port
+        SPEECHLESS_CRITICAL_HR_THRESHOLD: Heart rate emergency threshold (BPM)
+        SPEECHLESS_HR_SAMPLING_INTERVAL: Heart rate sampling interval in seconds
+        SPEECHLESS_WHISPER_MODEL_SIZE: Whisper model size for local STT
+        SPEECHLESS_STT_CONFIDENCE_THRESHOLD / SPEECHLESS_CONFIDENCE_THRESHOLD: STT confidence threshold
+        SPEECHLESS_CLASSIFICATION_THRESHOLD: Classification confidence threshold
 
     Returns:
         AppConfig with values from environment or defaults.
     """
-    return AppConfig(
-        # Edge LLM
-        edge_target=os.environ.get("SPEECHLESS_EDGE_TARGET", "lmstudio"),
-        lmstudio_url=os.environ.get("SPEECHLESS_LMSTUDIO_URL", "http://localhost:1234/v1"),
-        jetson_url=os.environ.get("SPEECHLESS_JETSON_URL", "http://jetson-device:8080/v1"),
-        edge_model_name=os.environ.get("SPEECHLESS_EDGE_MODEL_NAME", "local-model"),
-        # AWS Bedrock
-        bedrock_profile=os.environ.get("SPEECHLESS_BEDROCK_PROFILE", "losrudos"),
-        bedrock_model_id=os.environ.get(
-            "SPEECHLESS_BEDROCK_MODEL_ID",
-            "anthropic.claude-3-haiku-20240307-v1:0",
+    config = AppConfig(
+        edge_target=_get_env("SPEECHLESS_EDGE_TARGET", default="lmstudio"),
+        edge_lm_url=_get_env(
+            "SPEECHLESS_EDGE_LM_URL",
+            "SPEECHLESS_LMSTUDIO_URL",
+            default="http://localhost:1234/v1",
         ),
-        bedrock_region=os.environ.get("SPEECHLESS_BEDROCK_REGION", "us-east-1"),
-        # Connectivity
-        ping_url=os.environ.get(
+        jetson_url=_get_env("SPEECHLESS_JETSON_URL", default="http://jetson-device:8080/v1"),
+        edge_model_name=_get_env("SPEECHLESS_EDGE_MODEL_NAME", default="local-model"),
+        bedrock_profile=_get_env("SPEECHLESS_BEDROCK_PROFILE", default="losrudos"),
+        bedrock_model_id=_get_env(
+            "SPEECHLESS_BEDROCK_MODEL_ID",
+            "SPEECHLESS_BEDROCK_MODEL",
+            default="anthropic.claude-3-haiku-20240307-v1:0",
+        ),
+        bedrock_region=_get_env("SPEECHLESS_BEDROCK_REGION", default="us-east-1"),
+        ping_url=_get_env(
             "SPEECHLESS_PING_URL",
-            "http://connectivitycheck.gstatic.com/generate_204",
+            default="http://connectivitycheck.gstatic.com/generate_204",
         ),
         ping_interval_seconds=float(
-            os.environ.get("SPEECHLESS_PING_INTERVAL", "3.0")
+            _get_env("SPEECHLESS_PING_INTERVAL", default="3.0")
         ),
-        # Kuksa
-        kuksa_host=os.environ.get("SPEECHLESS_KUKSA_HOST", "localhost"),
-        kuksa_port=int(os.environ.get("SPEECHLESS_KUKSA_PORT", "55555")),
-        # Biometric
+        kuksa_host=_get_env("SPEECHLESS_KUKSA_HOST", default="localhost"),
+        kuksa_port=int(_get_env("SPEECHLESS_KUKSA_PORT", default="55556")),
         critical_hr_threshold=int(
-            os.environ.get("SPEECHLESS_CRITICAL_HR_THRESHOLD", "180")
+            _get_env("SPEECHLESS_CRITICAL_HR_THRESHOLD", default="180")
         ),
         hr_sampling_interval=float(
-            os.environ.get("SPEECHLESS_HR_SAMPLING_INTERVAL", "5.0")
+            _get_env("SPEECHLESS_HR_SAMPLING_INTERVAL", default="5.0")
         ),
-        # STT
-        whisper_model_size=os.environ.get("SPEECHLESS_WHISPER_MODEL_SIZE", "base"),
+        whisper_model_size=_get_env("SPEECHLESS_WHISPER_MODEL_SIZE", default="base"),
         stt_confidence_threshold=float(
-            os.environ.get("SPEECHLESS_STT_CONFIDENCE_THRESHOLD", "0.7")
+            _get_env(
+                "SPEECHLESS_STT_CONFIDENCE_THRESHOLD",
+                "SPEECHLESS_CONFIDENCE_THRESHOLD",
+                default="0.7",
+            )
         ),
-        # Classification
         classification_confidence_threshold=float(
-            os.environ.get("SPEECHLESS_CLASSIFICATION_THRESHOLD", "0.6")
+            _get_env("SPEECHLESS_CLASSIFICATION_THRESHOLD", default="0.6")
         ),
     )
+    return config

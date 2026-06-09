@@ -1,7 +1,5 @@
 """Data models for the Speechless voice assistant pipeline."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -28,11 +26,20 @@ class ProcessingMode(Enum):
 
 
 @dataclass
+class ConversationTurn:
+    """A single turn in a conversation."""
+
+    role: str  # "user" or "assistant"
+    content: str
+    timestamp: Optional[datetime] = None
+
+
+@dataclass
 class PipelineContext:
     """Context passed through the processing pipeline.
 
-    Tracks the current state, connectivity mode, and accumulated results
-    as a voice command flows through the pipeline stages.
+    Holds the current pipeline state, processing mode, and conversation context
+    for multi-turn interactions (especially during offline mode).
     """
 
     state: PipelineState = PipelineState.IDLE
@@ -44,20 +51,17 @@ class PipelineContext:
     response_text: Optional[str] = None
     error: Optional[str] = None
     start_time: Optional[datetime] = None
+    conversation_history: list[ConversationTurn] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
 
 
 @dataclass
 class AppConfig:
-    """Top-level application configuration.
-
-    All fields have sensible defaults and can be overridden via environment
-    variables using the load_config() function in speechless.config.
-    """
+    """Top-level application configuration."""
 
     # Edge LLM
     edge_target: str = "lmstudio"  # "lmstudio" or "jetson"
-    lmstudio_url: str = "http://localhost:1234/v1"
+    edge_lm_url: str = "http://localhost:1234/v1"
     jetson_url: str = "http://jetson-device:8080/v1"
     edge_model_name: str = "local-model"
 
@@ -72,7 +76,7 @@ class AppConfig:
 
     # Kuksa
     kuksa_host: str = "localhost"
-    kuksa_port: int = 55555
+    kuksa_port: int = 55556
 
     # Biometric
     critical_hr_threshold: int = 180

@@ -1,76 +1,43 @@
 """Exponential backoff retry utility for resilient operations."""
 
+import time
 from dataclasses import dataclass
 from typing import Callable, Optional, TypeVar
-import time
 
 T = TypeVar("T")
 
 
 @dataclass
 class RetryConfig:
-    """Configuration for retry behavior with exponential backoff.
-
-    Attributes:
-        max_retries: Maximum number of retry attempts (default 3).
-        base_delay: Initial delay in seconds before first retry (default 1.0).
-        multiplier: Factor by which delay increases each retry (default 2.0).
-        max_delay: Optional cap on delay in seconds. None means no cap.
-    """
+    """Configuration for exponential backoff retry."""
 
     max_retries: int = 3
-    base_delay: float = 1.0
+    base_delay: float = 1.0  # seconds
+    max_delay: float = 30.0  # seconds
     multiplier: float = 2.0
-    max_delay: Optional[float] = None
 
 
 def compute_backoff_delay(attempt: int, config: RetryConfig) -> float:
-    """Compute the backoff delay for a given retry attempt.
+    """Compute the delay for a given retry attempt using exponential backoff.
 
-    Args:
-        attempt: Zero-based attempt index (0 = first retry, 1 = second retry, etc.).
-        config: Retry configuration with base_delay, multiplier, and optional max_delay.
-
-    Returns:
-        The delay in seconds before the next retry, capped at max_delay if set.
+    attempt is 0-indexed (0 = first retry after initial failure).
     """
-    delay = config.base_delay * (config.multiplier ** attempt)
-    if config.max_delay is not None:
-        delay = min(delay, config.max_delay)
-    return delay
+    delay = config.base_delay * (config.multiplier**attempt)
+    return min(delay, config.max_delay)
 
 
-def retry_sync(func: Callable[[], T], config: Optional[RetryConfig] = None) -> T:
-    """Execute a function with synchronous retry and exponential backoff.
-
-    Calls func(). If it raises an exception, retries up to config.max_retries times
-    with exponential backoff delays between attempts.
-
-    Args:
-        func: A callable that takes no arguments and returns a value.
-        config: Retry configuration. Uses defaults if None.
-
-    Returns:
-        The return value of func() on success.
-
-    Raises:
-        The last exception raised by func() if all retries are exhausted.
-    """
-    if config is None:
-        config = RetryConfig()
-
-    last_exception: Optional[Exception] = None
-
+def retry_sync(
+    func: Callable[[], T],
+    config: RetryConfig = RetryConfig(),
+) -> T:
+    """Execute func with exponential backoff retry. Raises last exception on exhaustion."""
+    last_error: Optional[Exception] = None
     for attempt in range(config.max_retries + 1):
         try:
             return func()
-        except Exception as exc:
-            last_exception = exc
+        except Exception as e:
+            last_error = e
             if attempt < config.max_retries:
                 delay = compute_backoff_delay(attempt, config)
                 time.sleep(delay)
-
-    # This should never be reached without last_exception being set,
-    # but satisfy the type checker.
-    assert last_exception is not None
-    raise last_exception
+    raise last_error  # type: ignore[misc]

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speechless — Voice Assistant Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container { max-width: 1600px; margin: 0 auto; }
+
+        header {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 18px 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { font-size: 24px; color: #4cc9f0; }
+        .subtitle { color: #888; font-size: 13px; margin-top: 4px; }
+
+        .header-info { display: flex; gap: 20px; align-items: center; }
+
+        .status-badge {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px; font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .status-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .status-dot.connected { background: #4caf50; }
+        .status-dot.offline { background: #f44336; }
+
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+        .demo-button {
+            padding: 10px 24px; background: #4cc9f0; color: #1a1a2e;
+            border: none; border-radius: 6px; cursor: pointer;
+            font-size: 13px; font-weight: 700; transition: all 0.3s;
+        }
+        .demo-button:hover {
+            background: #72efdd; transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76,201,240,0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 16px; margin-bottom: 16px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border-radius: 12px; padding: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .card h2 {
+            font-size: 14px; color: #4cc9f0; margin-bottom: 14px;
+            padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        /* Car Visualization */
+        .car-scene {
+            background: #0a0a1a; border-radius: 10px;
+            padding: 16px; min-height: 320px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+
+        .car-indicators {
+            display: flex; justify-content: space-around;
+            width: 100%; margin-top: 12px;
+        }
+        .car-indicators .ind { text-align: center; }
+        .car-indicators .ind-value {
+            font-size: 20px; font-weight: 700; color: #4cc9f0;
+        }
+        .car-indicators .ind-label { font-size: 10px; color: #666; text-transform: uppercase; }
+
+        /* Speedometer */
+        .speedometer {
+            display: flex; flex-direction: column; align-items: center;
+            margin: 12px 0; padding: 10px 0;
+        }
+        .gauge-value { font-size: 32px; font-weight: 700; color: #4cc9f0; margin-top: 4px; }
+        .gauge-value.high { color: #ff9800; }
+        .gauge-value.critical { color: #f44336; }
+        .gauge-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Metrics */
+        .metric {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .metric label { font-weight: 500; color: #999; font-size: 12px; }
+        .metric value { font-size: 15px; font-weight: 600; color: #4cc9f0; }
+
+        /* Routing badges */
+        .routing-badge {
+            display: inline-block; padding: 4px 10px;
+            border-radius: 12px; font-size: 11px; font-weight: 700; color: white;
+        }
+        .routing-badge.edge { background: #4caf50; }
+        .routing-badge.cloud { background: #2196f3; }
+
+        /* Signal bars */
+        .signal-container {
+            display: flex; align-items: flex-end; justify-content: center;
+            gap: 3px; height: 50px; margin: 12px 0;
+        }
+        .signal-bar {
+            width: 12px; border-radius: 2px 2px 0 0;
+            background: rgba(255,255,255,0.1); transition: all 0.4s;
+        }
+        .signal-bar.active { background: #4caf50; }
+        .signal-bar.active.warning { background: #ff9800; }
+        .signal-bar.active.critical { background: #f44336; }
+
+        .signal-label {
+            text-align: center; font-size: 11px; font-weight: 600;
+            color: #4caf50; margin-top: 4px;
+        }
+        .signal-label.warning { color: #ff9800; }
+        .signal-label.critical { color: #f44336; }
+
+        /* Command display */
+        .command-box {
+            padding: 10px; background: rgba(255,255,255,0.03);
+            border-radius: 6px; margin-bottom: 12px; display: none;
+            border-left: 3px solid #4cc9f0;
+        }
+        .command-box .cmd-label { font-size: 10px; color: #666; text-transform: uppercase; }
+        .command-box .cmd-text { font-weight: 600; margin-top: 4px; color: #e0e0e0; }
+        .command-box .cmd-meta { font-size: 11px; color: #888; margin-top: 4px; }
+
+        /* Routing history dots */
+        .routing-history { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
+        .routing-dot {
+            width: 16px; height: 16px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2); cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .routing-dot:hover { transform: scale(1.3); }
+        .routing-dot.edge { background: #4caf50; }
+        .routing-dot.cloud { background: #2196f3; }
+
+        /* Logs */
+        .logs-container {
+            max-height: 300px; overflow-y: auto;
+            background: rgba(0,0,0,0.2); border-radius: 6px; padding: 8px;
+        }
+        .log-entry {
+            padding: 6px 8px; margin-bottom: 4px;
+            border-left: 3px solid #4cc9f0;
+            background: rgba(255,255,255,0.02);
+            border-radius: 3px; font-size: 11px;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn { from{transform:translateX(-8px);opacity:0;} to{transform:translateX(0);opacity:1;} }
+        .log-entry.INFO { border-left-color: #2196f3; }
+        .log-entry.VOICE { border-left-color: #4caf50; }
+        .log-entry.ROUTING { border-left-color: #ff9800; }
+        .log-entry.NETWORK { border-left-color: #9c27b0; }
+        .log-entry.KUKSA { border-left-color: #00bcd4; }
+        .log-entry.ERROR { border-left-color: #f44336; }
+        .log-time { font-size: 10px; color: #555; }
+        .log-msg { color: #ccc; margin-top: 2px; }
+
+        /* Animations */
+        @keyframes roadMove { 0%{transform:translateY(0);} 100%{transform:translateY(60px);} }
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+        /* Responsive */
+        @media (max-width: 1200px) { .grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+
+        .footer { text-align: center; color: #444; margin-top: 24px; font-size: 11px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div>
+            <h1>🚗 Speechless — Voice Assistant</h1>
+            <div class="subtitle">Team LosRudos | Edge-Cloud Hybrid Vehicle Control</div>
+        </div>
+        <div class="header-info">
+            <div class="status-badge">
+                <span class="status-dot connected" id="network-status"></span>
+                <span id="network-info">Connected: 50ms</span>
+            </div>
+            <button class="demo-button" onclick="startDemo()">▶ Start Demo</button>
+        </div>
+    </header>
+
+    <div class="grid">
+        <!-- Column 1: Vehicle Visualization -->
+        <div class="card">
+            <h2>🚗 Vehicle State</h2>
+            <div class="car-scene">
+                <svg viewBox="0 0 300 380" style="width:100%; max-height:300px;">
+                    <!-- Road -->
+                    <rect x="60" y="0" width="180" height="380" fill="#2a2a3a" rx="8"/>
+                    <g id="road-dashes">
+                        <rect x="147" y="10" width="6" height="28" fill="#555" rx="2"/>
+                        <rect x="147" y="68" width="6" height="28" fill="#555" rx="2"/>
+                        <rect x="147" y="126" width="6" height="28" fill="#555" rx="2"/>
+                        <rect x="147" y="184" width="6" height="28" fill="#555" rx="2"/>
+                        <rect x="147" y="242" width="6" height="28" fill="#555" rx="2"/>
+                        <rect x="147" y="300" width="6" height="28" fill="#555" rx="2"/>
+                        <rect x="147" y="358" width="6" height="28" fill="#555" rx="2"/>
+                    </g>
+                    <rect x="62" y="0" width="2" height="380" fill="#FFD700" opacity="0.3"/>
+                    <rect x="236" y="0" width="2" height="380" fill="#FFD700" opacity="0.3"/>
+
+                    <!-- Car -->
+                    <g id="car-group" style="transform-origin:150px 190px; transition:transform 0.4s ease;">
+                        <ellipse cx="150" cy="195" rx="36" ry="58" fill="rgba(0,0,0,0.25)"/>
+                        <rect x="120" y="140" width="60" height="105" fill="#e63946" rx="18"/>
+                        <rect x="126" y="130" width="48" height="22" fill="#e63946" rx="12"/>
+                        <rect x="124" y="238" width="52" height="16" fill="#c1121f" rx="8"/>
+                        <rect x="130" y="150" width="40" height="26" fill="#4cc9f0" rx="7" opacity="0.85"/>
+                        <rect x="132" y="224" width="36" height="18" fill="#4cc9f0" rx="5" opacity="0.7"/>
+                        <rect x="134" y="180" width="32" height="36" fill="#a4161a" rx="3"/>
+                        <!-- Wheels -->
+                        <rect id="wheel-fl" x="109" y="145" width="11" height="24" fill="#111" rx="3" style="transform-origin:114px 157px; transition:transform 0.3s;"/>
+                        <rect id="wheel-fr" x="180" y="145" width="11" height="24" fill="#111" rx="3" style="transform-origin:185px 157px; transition:transform 0.3s;"/>
+                        <rect x="109" y="225" width="11" height="24" fill="#111" rx="3"/>
+                        <rect x="180" y="225" width="11" height="24" fill="#111" rx="3"/>
+                        <!-- Lights -->
+                        <rect id="headlight-l" x="128" y="128" width="10" height="5" fill="#FFF3B0" rx="2" opacity="0.8"/>
+                        <rect id="headlight-r" x="162" y="128" width="10" height="5" fill="#FFF3B0" rx="2" opacity="0.8"/>
+                        <rect id="brake-l" x="126" y="251" width="9" height="4" fill="#ff6b6b" rx="2" opacity="0.4"/>
+                        <rect id="brake-r" x="165" y="251" width="9" height="4" fill="#ff6b6b" rx="2" opacity="0.4"/>
+                        <!-- Hazards -->
+                        <rect id="hazard-fl" x="117" y="143" width="4" height="4" fill="#FFA500" rx="1" opacity="0"/>
+                        <rect id="hazard-fr" x="179" y="143" width="4" height="4" fill="#FFA500" rx="1" opacity="0"/>
+                        <rect id="hazard-rl" x="117" y="243" width="4" height="4" fill="#FFA500" rx="1" opacity="0"/>
+                        <rect id="hazard-rr" x="179" y="243" width="4" height="4" fill="#FFA500" rx="1" opacity="0"/>
+                    </g>
+                </svg>
+                <div class="car-indicators">
+                    <div class="ind">
+                        <div class="ind-value" id="speed-display">0</div>
+                        <div class="ind-label">km/h</div>
+                    </div>
+                    <div class="ind">
+                        <div class="ind-value" id="steer-display" style="color:#e63946;">0°</div>
+                        <div class="ind-label">steering</div>
+                    </div>
+                    <div class="ind">
+                        <div class="ind-value" id="hazard-display">⚪</div>
+                        <div class="ind-label">hazard</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speedometer -->
+            <div class="speedometer">
+                <svg viewBox="0 0 200 110" width="200" height="110">
+                    <path d="M 20 95 A 78 78 0 0 1 180 95" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10" stroke-linecap="round"/>
+                    <path d="M 20 95 A 78 78 0 0 1 100 17" fill="none" stroke="#4caf50" stroke-width="10" stroke-linecap="round" opacity="0.15"/>
+                    <path d="M 100 17 A 78 78 0 0 1 155 42" fill="none" stroke="#ff9800" stroke-width="10" stroke-linecap="round" opacity="0.15"/>
+                    <path d="M 155 42 A 78 78 0 0 1 180 95" fill="none" stroke="#f44336" stroke-width="10" stroke-linecap="round" opacity="0.15"/>
+                    <path id="speed-arc" d="M 20 95 A 78 78 0 0 1 20 95" fill="none" stroke="#4caf50" stroke-width="10" stroke-linecap="round"/>
+                    <line id="speed-needle" x1="100" y1="95" x2="100" y2="25" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" style="transform-origin:100px 95px; transition:transform 0.4s ease;"/>
+                    <circle cx="100" cy="95" r="5" fill="#333"/><circle cx="100" cy="95" r="2.5" fill="#e63946"/>
+                    <text x="18" y="108" font-size="8" fill="#555">0</text>
+                    <text x="96" y="12" font-size="8" fill="#555">100</text>
+                    <text x="176" y="108" font-size="8" fill="#555">200</text>
+                </svg>
+                <div class="gauge-value" id="gauge-speed-value">0</div>
+                <div class="gauge-label">km/h</div>
+            </div>
+
+            <!-- Quick metrics -->
+            <div class="metric"><label>Temperature:</label><value id="metric-temp">22°C</value></div>
+            <div class="metric"><label>Windows:</label><value id="metric-window">Closed</value></div>
+            <div class="metric"><label>Doors:</label><value id="metric-doors">Locked</value></div>
+            <div class="metric"><label>Lights:</label><value id="metric-lights">OFF</value></div>
+            <div class="metric"><label>Commands:</label><value id="metric-cmds">0</value></div>
+        </div>
+
+        <!-- Column 2: Routing Decisions -->
+        <div class="card">
+            <h2>🗺️ Routing</h2>
+
+            <div class="command-box" id="current-command">
+                <div class="cmd-label">Voice Command</div>
+                <div class="cmd-text" id="command-text"></div>
+                <div class="cmd-meta">
+                    Intent: <span id="command-intent"></span> |
+                    Confidence: <span id="command-conf"></span> |
+                    <span id="command-crit"></span>
+                </div>
+            </div>
+
+            <div class="command-box" id="routing-info" style="border-left-color:#ff9800;">
+                <div class="cmd-label">Routing Decision</div>
+                <div class="cmd-text" id="routing-location"></div>
+                <div class="cmd-meta">Latency: <span id="routing-latency"></span> ms</div>
+                <div id="routing-response" style="font-size:11px; margin-top:6px; padding:6px; background:rgba(0,0,0,0.2); border-radius:4px; color:#aaa;"></div>
+                <span id="fallback-badge" class="routing-badge" style="background:#FF9800; display:none; margin-top:6px;">⚠️ Fallback</span>
+            </div>
+
+            <div style="font-size:12px; color:#666; margin:12px 0 6px;">Decision History</div>
+            <div class="routing-history" id="routing-history"></div>
+
+            <div style="font-size:12px; color:#666; margin:14px 0 6px;">Statistics</div>
+            <div class="metric"><label>Total:</label><value id="stat-total">0</value></div>
+            <div class="metric"><label>Edge:</label><value id="stat-edge" style="color:#4caf50;">0</value></div>
+            <div class="metric"><label>Cloud:</label><value id="stat-cloud" style="color:#2196f3;">0</value></div>
+            <div class="metric"><label>Success:</label><value id="stat-success">0%</value></div>
+            <div class="metric"><label>Avg Latency:</label><value id="stat-latency">0 ms</value></div>
+        </div>
+
+        <!-- Column 3: Network + Voice -->
+        <div class="card">
+            <h2>📡 Network</h2>
+            <div class="metric"><label>Status:</label><value id="net-status">Connected</value></div>
+            <div class="metric"><label>Latency:</label><value id="net-latency">50 ms</value></div>
+            <div class="metric"><label>Packet Loss:</label><value id="net-loss">0%</value></div>
+
+            <div class="signal-container">
+                <div class="signal-bar" id="sig-1" style="height:20%;"></div>
+                <div class="signal-bar" id="sig-2" style="height:40%;"></div>
+                <div class="signal-bar" id="sig-3" style="height:60%;"></div>
+                <div class="signal-bar" id="sig-4" style="height:80%;"></div>
+                <div class="signal-bar" id="sig-5" style="height:100%;"></div>
+            </div>
+            <div class="signal-label" id="signal-label">Excellent</div>
+
+            <div style="font-size:12px; color:#666; margin:14px 0 6px;">Last Recognition</div>
+            <div class="metric"><label>Intent:</label><value id="last-intent">—</value></div>
+            <div class="metric"><label>Confidence:</label><value id="last-conf">—</value></div>
+            <div class="metric"><label>Criticality:</label><value id="last-crit">—</value></div>
+        </div>
+    </div>
+
+    <!-- Live Logs -->
+    <div class="card">
+        <h2>📋 Live Event Log</h2>
+        <div class="logs-container" id="logs-container"></div>
+    </div>
+
+    <!-- Kuksa VSS Panel -->
+    <div class="card" style="margin-top:16px;">
+        <h2>🔌 Kuksa Vehicle Databroker (VSS)</h2>
+        <div style="display:grid; grid-template-columns:1fr 2fr 1fr; gap:16px;">
+            <!-- Connection status -->
+            <div>
+                <div class="metric">
+                    <label>Status:</label>
+                    <value id="kuksa-status" style="color:#f44336;">Disconnected</value>
+                </div>
+                <div class="metric">
+                    <label>Endpoint:</label>
+                    <value id="kuksa-endpoint" style="font-size:12px;">localhost:55555</value>
+                </div>
+                <div class="metric">
+                    <label>Operations:</label>
+                    <value id="kuksa-ops-count">0</value>
+                </div>
+                <div class="metric">
+                    <label>Errors:</label>
+                    <value id="kuksa-err-count" style="color:#f44336;">0</value>
+                </div>
+                <button class="demo-button" style="margin-top:10px; padding:6px 14px; font-size:11px;" onclick="reconnectKuksa()">🔄 Reconnect</button>
+            </div>
+            <!-- Recent VSS Operations -->
+            <div>
+                <div style="font-size:11px; color:#666; margin-bottom:6px; text-transform:uppercase;">Recent VSS Operations</div>
+                <div id="kuksa-operations" style="max-height:140px; overflow-y:auto; background:rgba(0,0,0,0.2); border-radius:4px; padding:6px; font-family:monospace; font-size:10px;"></div>
+            </div>
+            <!-- Telemetry -->
+            <div>
+                <div style="font-size:11px; color:#666; margin-bottom:6px; text-transform:uppercase;">Vehicle Telemetry</div>
+                <div class="metric"><label>GPS:</label><value id="tel-gps" style="font-size:11px;">—</value></div>
+                <div class="metric"><label>Fuel:</label><value id="tel-fuel">—</value></div>
+                <div class="metric"><label>Consumption:</label><value id="tel-consumption">—</value></div>
+                <div class="metric"><label>Heart Rate:</label><value id="tel-hr">—</value></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">Speechless Dashboard | Team LosRudos | Hackathon 2025</div>
+</div>
+
+<script>
+let updateInterval;
+
+async function updateDashboard() {
+    try {
+        const res = await fetch('/api/state');
+        const s = await res.json();
+
+        // Vehicle
+        if (s.vehicle_state && Object.keys(s.vehicle_state).length > 0) {
+            const v = s.vehicle_state;
+            document.getElementById('speed-display').textContent = (v.speed||0).toFixed(0);
+            document.getElementById('steer-display').textContent = (v.steering_angle||0).toFixed(0) + '°';
+            document.getElementById('hazard-display').textContent = v.hazard_lights ? '🟠' : '⚪';
+            document.getElementById('metric-temp').textContent = (v.temperature||22).toFixed(0) + '°C';
+            document.getElementById('metric-window').textContent = v.window_position > 0 ? 'Open' : 'Closed';
+            document.getElementById('metric-doors').textContent = v.doors_locked ? 'Locked' : 'Unlocked';
+            document.getElementById('metric-lights').textContent = v.headlights ? 'ON' : 'OFF';
+            document.getElementById('metric-cmds').textContent = v.commands_executed || 0;
+            updateSpeedometer(v.speed||0);
+            updateCar(v);
+        }
+
+        // Network
+        if (s.network_status) {
+            const n = s.network_status;
+            document.getElementById('net-latency').textContent = Math.round(n.latency_ms) + ' ms';
+            document.getElementById('net-loss').textContent = (n.packet_loss*100).toFixed(1) + '%';
+            document.getElementById('net-status').textContent = n.is_connected ? 'Connected' : 'OFFLINE';
+            document.getElementById('net-status').style.color = n.is_connected ? '#4caf50' : '#f44336';
+            const dot = document.getElementById('network-status');
+            dot.className = 'status-dot ' + (n.is_connected ? 'connected' : 'offline');
+            document.getElementById('network-info').textContent = (n.is_connected?'Connected':'Offline') + ': ' + Math.round(n.latency_ms) + 'ms';
+            updateSignal(n.latency_ms, n.is_connected);
+        }
+
+        // Command
+        if (s.current_command) {
+            const c = s.current_command;
+            document.getElementById('current-command').style.display = 'block';
+            document.getElementById('command-text').textContent = '"' + c.raw_text + '"';
+            document.getElementById('command-intent').textContent = c.intent;
+            document.getElementById('command-conf').textContent = (c.confidence*100).toFixed(0) + '%';
+            document.getElementById('command-crit').textContent = c.criticality;
+            document.getElementById('last-intent').textContent = c.intent;
+            document.getElementById('last-conf').textContent = (c.confidence*100).toFixed(0) + '%';
+            document.getElementById('last-crit').textContent = c.criticality;
+        }
+
+        // Routing
+        if (s.routing_decision) {
+            const r = s.routing_decision;
+            document.getElementById('routing-info').style.display = 'block';
+            document.getElementById('routing-location').textContent = r.executed_on.toUpperCase();
+            document.getElementById('routing-location').style.color = r.executed_on === 'edge' ? '#4caf50' : '#2196f3';
+            document.getElementById('routing-latency').textContent = r.latency_ms.toFixed(1);
+            document.getElementById('routing-response').textContent = r.response || '';
+            document.getElementById('fallback-badge').style.display = r.fallback_used ? 'inline-block' : 'none';
+        }
+
+        // History
+        if (s.routing_history && s.routing_history.length > 0) {
+            const h = document.getElementById('routing-history');
+            h.innerHTML = '';
+            s.routing_history.forEach(rd => {
+                const d = document.createElement('div');
+                d.className = 'routing-dot ' + rd.executed_on;
+                d.title = rd.intent + ' → ' + rd.executed_on + ' (' + rd.latency_ms.toFixed(0) + 'ms)';
+                h.appendChild(d);
+            });
+        }
+
+        // Stats
+        if (s.statistics) {
+            const st = s.statistics;
+            document.getElementById('stat-total').textContent = st.total_commands || 0;
+            document.getElementById('stat-edge').textContent = st.edge_executions || 0;
+            document.getElementById('stat-cloud').textContent = st.cloud_executions || 0;
+            document.getElementById('stat-success').textContent = ((st.success_rate||0)*100).toFixed(0) + '%';
+            document.getElementById('stat-latency').textContent = (st.avg_latency_ms||0).toFixed(0) + ' ms';
+        }
+
+        // Logs
+        if (s.logs && s.logs.length > 0) {
+            const lc = document.getElementById('logs-container');
+            lc.innerHTML = '';
+            s.logs.forEach(log => {
+                const e = document.createElement('div');
+                e.className = 'log-entry ' + (log.level||'INFO');
+                e.innerHTML = '<div class="log-time">' + new Date(log.timestamp).toLocaleTimeString() + '</div><div class="log-msg">' + log.message + '</div>';
+                lc.appendChild(e);
+            });
+        }
+
+        // Kuksa
+        updateKuksa(s);
+    } catch(err) { console.error('Update error:', err); }
+}
+
+function updateSpeedometer(speed) {
+    const pct = Math.min(speed/200, 1);
+    const angle = -90 + pct*180;
+    const needle = document.getElementById('speed-needle');
+    if(needle) needle.style.transform = 'rotate('+angle+'deg)';
+
+    const arc = document.getElementById('speed-arc');
+    if(arc && pct > 0.01) {
+        const a = Math.PI - pct*Math.PI;
+        const ex = 100 + 78*Math.cos(a), ey = 95 - 78*Math.sin(a);
+        const large = pct > 0.5 ? 1 : 0;
+        arc.setAttribute('d', 'M 20 95 A 78 78 0 '+large+' 1 '+ex+' '+ey);
+        arc.setAttribute('stroke', speed<100?'#4caf50':speed<150?'#ff9800':'#f44336');
+    } else if(arc) { arc.setAttribute('d','M 20 95 A 78 78 0 0 1 20 95'); }
+
+    const gv = document.getElementById('gauge-speed-value');
+    if(gv) {
+        gv.textContent = Math.round(speed);
+        gv.className = 'gauge-value' + (speed>=150?' critical':speed>=100?' high':'');
+    }
+}
+
+function updateCar(v) {
+    const steer = v.steering_angle || 0;
+    const speed = v.speed || 0;
+    const hazard = v.hazard_lights || false;
+
+    const car = document.getElementById('car-group');
+    if(car) car.style.transform = 'rotate('+(steer*0.5)+'deg)';
+
+    const wfl = document.getElementById('wheel-fl');
+    const wfr = document.getElementById('wheel-fr');
+    if(wfl) wfl.style.transform = 'rotate('+(steer*0.8)+'deg)';
+    if(wfr) wfr.style.transform = 'rotate('+(steer*0.8)+'deg)';
+
+    const rd = document.getElementById('road-dashes');
+    if(rd) {
+        if(speed > 0) { rd.style.animation = 'roadMove '+Math.max(0.3, 3-speed/40)+'s linear infinite'; }
+        else { rd.style.animation = 'none'; }
+    }
+
+    const bo = speed === 0 ? 0.9 : 0.3;
+    ['brake-l','brake-r'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) { el.style.opacity = bo; el.style.fill = bo>0.5?'#ff0000':'#ff6b6b'; }
+    });
+
+    ['hazard-fl','hazard-fr','hazard-rl','hazard-rr'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) { el.style.opacity = hazard?'1':'0'; el.style.animation = hazard?'blink 0.6s infinite':'none'; }
+    });
+
+    ['headlight-l','headlight-r'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.style.opacity = speed>0?'1':'0.5';
+    });
+}
+
+function updateSignal(latency, connected) {
+    const quality = connected ? Math.max(0, 1 - latency/1000) : 0;
+    const bars = Math.round(quality * 5);
+    let cls='', txt='No Signal';
+    if(bars>=4){cls='';txt='Excellent';}
+    else if(bars===3){cls='warning';txt='Good';}
+    else if(bars===2){cls='warning';txt='Fair';}
+    else if(bars===1){cls='critical';txt='Poor';}
+    else{cls='critical';txt='No Signal';}
+
+    for(let i=1;i<=5;i++){
+        const b=document.getElementById('sig-'+i);
+        b.className = i<=bars ? 'signal-bar active '+cls : 'signal-bar';
+    }
+    const lbl = document.getElementById('signal-label');
+    lbl.textContent = txt; lbl.className = 'signal-label '+cls;
+}
+
+function startDemo() {
+    fetch('/api/start-demo').then(r=>r.json()).then(d=>console.log(d.status));
+}
+
+function reconnectKuksa() {
+    fetch('/api/kuksa/reconnect').then(r=>r.json()).then(d=>{
+        console.log('Kuksa reconnect:', d.connected);
+    });
+}
+
+function updateKuksa(state) {
+    if (!state.kuksa) return;
+    const k = state.kuksa;
+
+    // Status
+    if (k.status) {
+        const el = document.getElementById('kuksa-status');
+        if (k.status.connected) {
+            el.textContent = 'Connected';
+            el.style.color = '#4caf50';
+        } else {
+            el.textContent = 'Disconnected (simulated)';
+            el.style.color = '#ff9800';
+        }
+        document.getElementById('kuksa-endpoint').textContent = k.status.host + ':' + k.status.port;
+        document.getElementById('kuksa-ops-count').textContent = k.status.operations_count || 0;
+        document.getElementById('kuksa-err-count').textContent = k.status.errors_count || 0;
+    }
+
+    // Operations
+    if (k.operations && k.operations.length > 0) {
+        const opsEl = document.getElementById('kuksa-operations');
+        opsEl.innerHTML = '';
+        k.operations.forEach(op => {
+            const color = op.success ? '#4caf50' : '#ff9800';
+            const icon = op.operation === 'write' ? '✏️' : '📖';
+            const line = document.createElement('div');
+            line.style.marginBottom = '3px';
+            line.style.color = color;
+            line.innerHTML = icon + ' <span style="color:#4cc9f0;">' + op.path + '</span> = ' + op.value + ' <span style="color:#555;">(' + op.latency_ms.toFixed(1) + 'ms)</span>';
+            opsEl.appendChild(line);
+        });
+    }
+
+    // Telemetry
+    if (k.telemetry) {
+        const t = k.telemetry;
+        if (t.gps_latitude) document.getElementById('tel-gps').textContent = t.gps_latitude.toFixed(4) + ', ' + (t.gps_longitude||0).toFixed(4);
+        if (t.fuel_level !== undefined) document.getElementById('tel-fuel').textContent = t.fuel_level.toFixed(1) + '%';
+        if (t.fuel_consumption !== undefined) document.getElementById('tel-consumption').textContent = t.fuel_consumption.toFixed(1) + ' L/100km';
+        if (t.heart_rate !== undefined) document.getElementById('tel-hr').textContent = t.heart_rate + ' BPM';
+    }
+}
+
+updateDashboard();
+updateInterval = setInterval(updateDashboard, 500);
+</script>
+</body>
+</html>
