@@ -113,8 +113,23 @@ def create_app() -> Flask:
 
     @app.route("/")
     def index():
-        """Serve the dashboard HTML."""
-        return send_from_directory(str(template_dir), "dashboard.html")
+        """Serve the cockpit dashboard HTML."""
+        return send_from_directory(str(template_dir), "cockpit.html")
+
+    @app.route("/cockpit.css")
+    def cockpit_css():
+        """Serve the cockpit stylesheet."""
+        return send_from_directory(str(template_dir), "cockpit.css")
+
+    @app.route("/cockpit.js")
+    def cockpit_js():
+        """Serve the cockpit engine script."""
+        return send_from_directory(str(template_dir), "cockpit.js")
+
+    @app.route("/scenario.js")
+    def scenario_js():
+        """Serve the scripted demo timeline."""
+        return send_from_directory(str(template_dir), "scenario.js")
 
     @app.route("/api/state")
     def get_state():

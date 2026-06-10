@@ -1,153 +1,312 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mxfile host="app.diagrams.net" modified="2026-06-10T00:00:00.000Z" agent="Speechless" version="24.0.0">
-  <diagram id="speechless-architecture" name="Speechless Architecture">
-    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+<mxfile host="app.diagrams.net" modified="2026-06-10T00:00:00.000Z" agent="Speechless Architecture" version="24.0.0" type="device">
+  <diagram id="speechless-architecture" name="Speechless - Voice Assistant Architecture">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1680" pageHeight="1000" math="0" shadow="0" background="#FFFFFF">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
 
-        <!-- EDGE LAYER (Blue) -->
-        <mxCell id="edge-layer" value="Edge Layer (Jetson / LM Studio)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=top;spacingTop=5;arcSize=5;" vertex="1" parent="1">
-          <mxGeometry x="40" y="40" width="700" height="520" as="geometry"/>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- TITLE -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <mxCell id="title" value="Speechless — In-Vehicle Voice Assistant" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=none;strokeColor=none;fontSize=24;fontStyle=1;fontColor=#232F3E;" vertex="1" parent="1">
+          <mxGeometry x="40" y="18" width="700" height="34" as="geometry"/>
+        </mxCell>
+        <mxCell id="subtitle" value="Edge-first architecture · cloud augmentation · vehicle signal (VSS) integration" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=none;strokeColor=none;fontSize=12;fontColor=#687078;" vertex="1" parent="1">
+          <mxGeometry x="40" y="52" width="700" height="20" as="geometry"/>
         </mxCell>
 
-        <!-- Audio Capture -->
-        <mxCell id="audio-capture" value="Audio Capture&#xa;(sounddevice)&#xa;16kHz mono" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="60" y="80" width="140" height="70" as="geometry"/>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- EDGE COMPUTE ZONE -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <mxCell id="edge-layer" value="&lt;font color=&quot;#232F3E&quot; style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;EDGE COMPUTE&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#687078&quot; style=&quot;font-size: 11px;&quot;&gt;Jetson Orin Nano · LM Studio&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#232F3E;strokeWidth=2;arcSize=2;verticalAlign=top;align=left;spacingTop=12;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="40" y="90" width="1000" height="780" as="geometry"/>
         </mxCell>
 
-        <!-- Speech Engine -->
-        <mxCell id="speech-engine" value="Speech Engine&#xa;(faster-whisper)&#xa;Local STT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="240" y="80" width="140" height="70" as="geometry"/>
+        <mxCell id="orchestrator" value="PIPELINE ORCHESTRATOR  ·  IDLE → LISTEN → TRANSCRIBE → CLASSIFY → EXECUTE → RESPOND" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#232F3E;strokeColor=#232F3E;fontColor=#FFFFFF;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="70" y="145" width="940" height="50" as="geometry"/>
         </mxCell>
 
-        <!-- Command Router -->
-        <mxCell id="command-router" value="Command Router&#xa;(keyword classifier)&#xa;&lt;100ms" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="420" y="80" width="140" height="70" as="geometry"/>
+        <!-- Row 1: Voice pipeline (primary path, numbered) -->
+        <mxCell id="audio-capture" value="&lt;b&gt;① Audio Capture&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;sounddevice · 16 kHz mono PCM&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="70" y="215" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="speech-engine" value="&lt;b&gt;② Speech Engine&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;faster-whisper · local STT&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="395" y="215" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="command-router" value="&lt;b&gt;③ Command Router&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;keyword classifier · &amp;lt;100 ms&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="215" width="290" height="120" as="geometry"/>
         </mxCell>
 
-        <!-- Intent Parser -->
-        <mxCell id="intent-parser" value="Intent Parser&#xa;(NLU extraction)&#xa;HVAC/Windows/Doors/Lights" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="60" y="200" width="160" height="70" as="geometry"/>
+        <!-- Row 2: Understanding & decision -->
+        <mxCell id="intent-parser" value="&lt;b&gt;④ Intent Parser&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;NLU → HVAC / Windows / Doors / Lights&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="70" y="365" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-llm" value="&lt;b&gt;Edge LLM Client&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;LM Studio · Jetson TensorRT-LLM&lt;br&gt;(OpenAI-compatible API)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="395" y="365" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="conv-context" value="&lt;b&gt;Conversation Context&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;rolling history · ≥5 turns offline&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="365" width="290" height="120" as="geometry"/>
         </mxCell>
 
-        <!-- Vehicle Controller -->
-        <mxCell id="vehicle-controller" value="Vehicle Controller&#xa;(Kuksa gRPC client)&#xa;VSS signal actuation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="60" y="310" width="160" height="70" as="geometry"/>
+        <!-- Row 3: Action & feedback -->
+        <mxCell id="vehicle-controller" value="&lt;b&gt;⑤ Vehicle Controller&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;Kuksa gRPC client · VSS actuation&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="70" y="515" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="response-engine" value="&lt;b&gt;⑥ Response Engine&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;pyttsx3 TTS · confirmations &amp;amp; alerts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="395" y="515" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-monitor" value="&lt;b&gt;Connectivity Monitor&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;httpx ping · 3 s interval&lt;br&gt;ONLINE ↔ OFFLINE&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="515" width="290" height="120" as="geometry"/>
         </mxCell>
 
-        <!-- Edge LLM -->
-        <mxCell id="edge-llm" value="Edge LLM Client&#xa;(OpenAI-compatible)&#xa;LM Studio / Jetson TRT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="280" y="200" width="170" height="70" as="geometry"/>
+        <!-- Row 4: Vehicle awareness -->
+        <mxCell id="telemetry-reader" value="&lt;b&gt;Telemetry Reader&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;GPS · fuel · heart rate via VSS&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="70" y="665" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="biometric-monitor" value="&lt;b&gt;Biometric Monitor&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;HR ≥ 180 BPM → emergency&lt;br&gt;30 s cancel window&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="395" y="665" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="route-planner" value="&lt;b&gt;Route Planner&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;fuel-aware routing · Haversine&lt;br&gt;multi-constraint&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="720" y="665" width="290" height="120" as="geometry"/>
         </mxCell>
 
-        <!-- Conversation Context -->
-        <mxCell id="conv-context" value="Conversation Context&#xa;(offline history)&#xa;≥5 turns" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="280" y="310" width="170" height="70" as="geometry"/>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- AWS CLOUD ZONE -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <mxCell id="cloud-layer" value="&lt;font color=&quot;#232F3E&quot; style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;AWS CLOUD&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#687078&quot; style=&quot;font-size: 11px;&quot;&gt;us-east-1 · profile &amp;quot;losrudos&amp;quot;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF9900;strokeWidth=2;arcSize=3;verticalAlign=top;align=left;spacingTop=12;spacingLeft=52;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="90" width="520" height="390" as="geometry"/>
         </mxCell>
 
-        <!-- Connectivity Monitor -->
-        <mxCell id="conn-monitor" value="Connectivity Monitor&#xa;(httpx ping, 3s interval)&#xa;ONLINE ↔ OFFLINE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="500" y="200" width="170" height="70" as="geometry"/>
+        <mxCell id="aws-cloud-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#FF9900;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.general_AWS_cloud;" vertex="1" parent="1">
+          <mxGeometry x="1095" y="98" width="32" height="32" as="geometry"/>
         </mxCell>
 
-        <!-- Response Engine / TTS -->
-        <mxCell id="response-engine" value="Response Engine&#xa;(pyttsx3 TTS)&#xa;Confirmations &amp; Alerts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="500" y="310" width="170" height="70" as="geometry"/>
+        <mxCell id="bedrock-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#FF9900;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.bedrock;" vertex="1" parent="1">
+          <mxGeometry x="1126" y="180" width="40" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="bedrock-client" value="&lt;b&gt;Bedrock Client&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;boto3 Converse API · Claude 3 Haiku&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF6E8;strokeColor=#FF9900;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=64;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="155" width="460" height="100" as="geometry"/>
         </mxCell>
 
-        <!-- Pipeline Orchestrator -->
-        <mxCell id="orchestrator" value="Pipeline Orchestrator&#xa;(state machine)&#xa;IDLE→LISTEN→TRANSCRIBE→CLASSIFY→EXECUTE→RESPOND" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="60" y="430" width="610" height="50" as="geometry"/>
+        <mxCell id="cloud-stt" value="&lt;b&gt;Cloud STT Fallback&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;OpenAI Whisper API (3rd-party)&lt;br&gt;used when local confidence &amp;lt; 0.7&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#879196;strokeWidth=1.5;dashed=1;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="270" width="460" height="85" as="geometry"/>
         </mxCell>
 
-        <!-- Telemetry Reader -->
-        <mxCell id="telemetry-reader" value="Telemetry Reader&#xa;(GPS, Fuel, HR)&#xa;VSS paths" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="60" y="510" width="150" height="60" as="geometry"/>
+        <mxCell id="realtime-queries" value="&lt;b&gt;Real-Time Queries&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;Fuel prices (EUR/L) · restaurant availability (3rd-party)&lt;br&gt;in-memory cache fallback&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#879196;strokeWidth=1.5;dashed=1;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="370" width="460" height="100" as="geometry"/>
         </mxCell>
 
-        <!-- Biometric Monitor -->
-        <mxCell id="biometric-monitor" value="Biometric Monitor&#xa;(HR ≥180 BPM → emergency)&#xa;5s sampling, 30s cancel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="240" y="510" width="180" height="60" as="geometry"/>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- VEHICLE NETWORK ZONE -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <mxCell id="vehicle-layer" value="&lt;font color=&quot;#232F3E&quot; style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;VEHICLE NETWORK&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#687078&quot; style=&quot;font-size: 11px;&quot;&gt;Eclipse Kuksa · COVESA VSS&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;strokeWidth=2;arcSize=3;verticalAlign=top;align=left;spacingTop=12;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="510" width="520" height="360" as="geometry"/>
         </mxCell>
 
-        <!-- Route Planner -->
-        <mxCell id="route-planner" value="Route Planner&#xa;(fuel-aware, Haversine)&#xa;multi-constraint" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3d9ff;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="450" y="510" width="160" height="60" as="geometry"/>
+        <mxCell id="kuksa-db" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;Kuksa Databroker&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#2E5230&quot;&gt;🐳 Docker · gRPC :55555&lt;br&gt;ghcr.io/eclipse-kuksa/kuksa-databroker:0.4.4&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#43A047;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="575" width="460" height="80" as="geometry"/>
         </mxCell>
 
-        <!-- CLOUD LAYER (Orange) -->
-        <mxCell id="cloud-layer" value="Cloud Layer (AWS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;verticalAlign=top;spacingTop=5;arcSize=5;" vertex="1" parent="1">
-          <mxGeometry x="800" y="40" width="380" height="280" as="geometry"/>
+        <mxCell id="vss-signals" value="&lt;font style=&quot;font-size: 11px;&quot; color=&quot;#2E7D32&quot;&gt;&lt;b&gt;VSS Signal Paths (read / write)&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#2E5230&quot;&gt;Vehicle.Cabin.HVAC.Station.Row1.Driver.Temperature&lt;br&gt;Vehicle.Cabin.Door.Row1.DriverSide.{IsLocked, Window.Position}&lt;br&gt;Vehicle.Body.Lights.DirectionIndicator.Left.IsSignaling&lt;br&gt;Vehicle.CurrentLocation.{Latitude, Longitude}&lt;br&gt;Vehicle.Powertrain.FuelSystem.{Level, InstantConsumption}&lt;br&gt;Vehicle.Occupant.Driver.HeartRate&lt;br&gt;Vehicle.Speed&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4FBF5;strokeColor=#A5D6A7;strokeWidth=1;arcSize=4;align=left;verticalAlign=top;spacingTop=8;spacingLeft=12;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="670" width="460" height="170" as="geometry"/>
         </mxCell>
 
-        <!-- Bedrock Client -->
-        <mxCell id="bedrock-client" value="Bedrock Client&#xa;(boto3 converse API)&#xa;Profile: losrudos&#xa;Model: Claude 3 Haiku" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6b3;strokeColor=#d6b656;" vertex="1" parent="1">
-          <mxGeometry x="820" y="80" width="170" height="80" as="geometry"/>
-        </mxCell>
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- DATA FLOW EDGES -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
 
-        <!-- Cloud STT Fallback -->
-        <mxCell id="cloud-stt" value="Cloud STT Fallback&#xa;(OpenAI Whisper API)&#xa;Triggered: confidence &lt; 0.7" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6b3;strokeColor=#d6b656;" vertex="1" parent="1">
-          <mxGeometry x="1010" y="80" width="150" height="80" as="geometry"/>
-        </mxCell>
-
-        <!-- Real-Time Query Handler -->
-        <mxCell id="realtime-handler" value="Real-Time Queries&#xa;(fuel prices EUR/L)&#xa;(restaurant availability)&#xa;Cache fallback" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6b3;strokeColor=#d6b656;" vertex="1" parent="1">
-          <mxGeometry x="820" y="190" width="170" height="80" as="geometry"/>
-        </mxCell>
-
-        <!-- VEHICLE LAYER (Green) -->
-        <mxCell id="vehicle-layer" value="Vehicle Layer (Kuksa Databroker)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;verticalAlign=top;spacingTop=5;arcSize=5;" vertex="1" parent="1">
-          <mxGeometry x="800" y="380" width="380" height="200" as="geometry"/>
-        </mxCell>
-
-        <!-- Kuksa Databroker -->
-        <mxCell id="kuksa-db" value="Kuksa Databroker&#xa;(Docker, gRPC :55555)&#xa;ghcr.io/eclipse-kuksa/kuksa-databroker:0.4.4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b3e6b3;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="820" y="420" width="340" height="60" as="geometry"/>
-        </mxCell>
-
-        <!-- VSS Signals -->
-        <mxCell id="vss-signals" value="VSS Signal Paths:&#xa;Vehicle.Cabin.HVAC.*&#xa;Vehicle.Cabin.Door.*&#xa;Vehicle.Body.Lights.*&#xa;Vehicle.CurrentLocation.*&#xa;Vehicle.Powertrain.FuelSystem.*&#xa;Vehicle.Occupant.Driver.HeartRate" style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="820" y="490" width="340" height="80" as="geometry"/>
-        </mxCell>
-
-        <!-- DATA FLOW ARROWS -->
-        <!-- Audio → Speech Engine -->
-        <mxCell id="flow1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="audio-capture" target="speech-engine" parent="1">
+        <!-- Primary pipeline (blue) -->
+        <mxCell id="flow-audio-speech" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="audio-capture" target="speech-engine" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <!-- Speech Engine → Router -->
-        <mxCell id="flow2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="speech-engine" target="command-router" parent="1">
+        <mxCell id="flow-speech-router" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="speech-engine" target="command-router" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <!-- Router → Intent Parser (edge path) -->
-        <mxCell id="flow3" value="vehicle_control" style="edgeStyle=orthogonalEdgeStyle;fontStyle=2;fontSize=9;" edge="1" source="command-router" target="intent-parser" parent="1">
+
+        <!-- Command Router branches -->
+        <mxCell id="flow-router-intent" value="vehicle_control" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;fontColor=#2E5C8A;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.85;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="command-router" target="intent-parser" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="215" y="317"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow-router-edgellm" value="informational · offline" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;fontColor=#2E5C8A;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="command-router" target="edge-llm" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="865" y="350"/>
+              <mxPoint x="540" y="350"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow-router-bedrock" value="informational · online" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF9900;strokeWidth=2;fontColor=#B36B00;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.6;entryDx=0;entryDy=0;" edge="1" source="command-router" target="bedrock-client" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <!-- Router → Cloud (cloud path) -->
-        <mxCell id="flow4" value="informational" style="edgeStyle=orthogonalEdgeStyle;fontStyle=2;fontSize=9;" edge="1" source="command-router" target="bedrock-client" parent="1">
+
+        <!-- Vehicle control execution path -->
+        <mxCell id="flow-intent-vehicle" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="intent-parser" target="vehicle-controller" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <!-- Intent Parser → Vehicle Controller -->
-        <mxCell id="flow5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="intent-parser" target="vehicle-controller" parent="1">
+        <mxCell id="flow-vehicle-response" value="confirmation" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;fontColor=#2E5C8A;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="vehicle-controller" target="response-engine" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <!-- Vehicle Controller → Kuksa -->
-        <mxCell id="flow6" value="gRPC" style="edgeStyle=orthogonalEdgeStyle;fontStyle=2;fontSize=9;" edge="1" source="vehicle-controller" target="kuksa-db" parent="1">
+
+        <!-- Informational answers converge on Response Engine -->
+        <mxCell id="flow-edgellm-response" value="answer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;fontColor=#2E5C8A;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="edge-llm" target="response-engine" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <!-- Connectivity Monitor → Orchestrator -->
-        <mxCell id="flow7" value="mode switch" style="edgeStyle=orthogonalEdgeStyle;dashed=1;fontSize=9;" edge="1" source="conn-monitor" target="orchestrator" parent="1">
+        <mxCell id="flow-bedrock-response" value="answer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF9900;strokeWidth=2;fontColor=#B36B00;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.85;exitDx=0;exitDy=0;entryX=1;entryY=0.3;entryDx=0;entryDy=0;" edge="1" source="bedrock-client" target="response-engine" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1060" y="240"/>
+              <mxPoint x="1060" y="548"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Vehicle / VSS edges (green) -->
+        <mxCell id="flow-vehicle-kuksa" value="gRPC write" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#43A047;strokeWidth=2;fontColor=#2E7D32;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.4;entryDx=0;entryDy=0;" edge="1" source="vehicle-controller" target="kuksa-db" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="215" y="650"/>
+              <mxPoint x="1060" y="650"/>
+              <mxPoint x="1060" y="607"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow-route-kuksa" value="VSS read" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#43A047;strokeWidth=2;fontColor=#2E7D32;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.6;entryDx=0;entryDy=0;" edge="1" source="route-planner" target="kuksa-db" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1060" y="725"/>
+              <mxPoint x="1060" y="623"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow-telemetry-kuksa" value="VSS read" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#43A047;strokeWidth=2;fontColor=#2E7D32;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.76;entryDx=0;entryDy=0;" edge="1" source="telemetry-reader" target="vss-signals" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="215" y="800"/>
+              <mxPoint x="1060" y="800"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow-biometric-kuksa" value="VSS read" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#43A047;strokeWidth=2;fontColor=#2E7D32;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.82;entryDx=0;entryDy=0;" edge="1" source="biometric-monitor" target="vss-signals" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="812"/>
+              <mxPoint x="1060" y="812"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Cross-cutting / monitoring (dashed gray) -->
+        <mxCell id="flow-conn-router" value="online ↔ offline mode" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#879196;strokeWidth=1.5;dashed=1;dashPattern=6 4;fontColor=#687078;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.2;exitDx=0;exitDy=0;entryX=0.3;entryY=1;entryDx=0;entryDy=0;" edge="1" source="conn-monitor" target="command-router" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="539"/>
+              <mxPoint x="700" y="335"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow-context-edgellm" value="context" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#879196;strokeWidth=1.5;dashed=1;dashPattern=6 4;fontColor=#687078;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="conv-context" target="edge-llm" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <!-- Context → Bedrock (forwarding) -->
-        <mxCell id="flow8" value="context forward" style="edgeStyle=orthogonalEdgeStyle;dashed=1;fontSize=9;" edge="1" source="conv-context" target="bedrock-client" parent="1">
+        <mxCell id="flow-context-bedrock" value="context forward" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF9900;strokeWidth=1.5;dashed=1;dashPattern=6 4;fontColor=#B36B00;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.2;exitDx=0;exitDy=0;entryX=0;entryY=0.7;entryDx=0;entryDy=0;" edge="1" source="conv-context" target="bedrock-client" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1060" y="389"/>
+              <mxPoint x="1060" y="225"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow-speech-cloudstt" value="confidence &amp;lt; 0.7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF9900;strokeWidth=1.5;dashed=1;dashPattern=6 4;fontColor=#B36B00;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" edge="1" source="speech-engine" target="cloud-stt" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="598" y="350"/>
+              <mxPoint x="1060" y="350"/>
+              <mxPoint x="1060" y="295"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow-route-realtime" value="fuel price lookup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF9900;strokeWidth=1.5;dashed=1;dashPattern=6 4;fontColor=#B36B00;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.2;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;" edge="1" source="route-planner" target="realtime-queries" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1060" y="689"/>
+              <mxPoint x="1060" y="450"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Safety alert (red, dashed) -->
+        <mxCell id="flow-biometric-response" value="emergency alert" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#E53935;strokeWidth=1.5;dashed=1;dashPattern=6 4;fontColor=#C62828;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" source="biometric-monitor" target="response-engine" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <!-- Telemetry → Kuksa -->
-        <mxCell id="flow9" value="VSS read" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" edge="1" source="telemetry-reader" target="kuksa-db" parent="1">
-          <mxGeometry relative="1" as="geometry"/>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- LEGEND -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <mxCell id="legend-line-1" style="endArrow=none;html=1;strokeColor=#4A8AC7;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="910" as="sourcePoint"/>
+            <mxPoint x="70" y="910" as="targetPoint"/>
+          </mxGeometry>
         </mxCell>
+        <mxCell id="legend-label-1" value="Edge-internal data flow" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=none;strokeColor=none;fontSize=11;fontColor=#3D4852;" vertex="1" parent="1">
+          <mxGeometry x="78" y="898" width="180" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="legend-line-2" style="endArrow=none;html=1;strokeColor=#FF9900;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="910" as="sourcePoint"/>
+            <mxPoint x="330" y="910" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-label-2" value="AWS Cloud / 3rd-party API flow" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=none;strokeColor=none;fontSize=11;fontColor=#3D4852;" vertex="1" parent="1">
+          <mxGeometry x="338" y="898" width="220" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="legend-line-3" style="endArrow=none;html=1;strokeColor=#43A047;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="600" y="910" as="sourcePoint"/>
+            <mxPoint x="630" y="910" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-label-3" value="Vehicle network (VSS via Kuksa)" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=none;strokeColor=none;fontSize=11;fontColor=#3D4852;" vertex="1" parent="1">
+          <mxGeometry x="638" y="898" width="220" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="legend-line-4" style="endArrow=none;html=1;strokeColor=#879196;strokeWidth=1.5;dashed=1;dashPattern=6 4;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="900" y="910" as="sourcePoint"/>
+            <mxPoint x="930" y="910" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-label-4" value="Monitoring &amp; context hand-off" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=none;strokeColor=none;fontSize=11;fontColor=#3D4852;" vertex="1" parent="1">
+          <mxGeometry x="938" y="898" width="200" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="legend-line-5" style="endArrow=none;html=1;strokeColor=#E53935;strokeWidth=1.5;dashed=1;dashPattern=6 4;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1180" y="910" as="sourcePoint"/>
+            <mxPoint x="1210" y="910" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-label-5" value="Safety alert" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=none;strokeColor=none;fontSize=11;fontColor=#3D4852;" vertex="1" parent="1">
+          <mxGeometry x="1218" y="898" width="120" height="24" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="legend-label-6" value="① – ⑥  Primary voice-command sequence" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fillColor=none;strokeColor=none;fontSize=11;fontStyle=1;fontColor=#232F3E;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="898" width="300" height="24" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- DIAGRAM CREDIT -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <mxCell id="diagram-title" value="&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#A6AFB8&quot;&gt;Speechless — In-Vehicle Voice Assistant Architecture&lt;/font&gt;" style="text;html=1;align=right;verticalAlign=bottom;whiteSpace=wrap;rounded=0;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1310" y="20" width="330" height="20" as="geometry"/>
+        </mxCell>
+
       </root>
     </mxGraphModel>
   </diagram>

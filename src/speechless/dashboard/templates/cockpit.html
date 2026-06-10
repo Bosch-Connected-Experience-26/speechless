@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speechless — Cockpit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@300;400;500;600;700;800&family=Saira+Semi+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="cockpit.css">
+</head>
+<body>
+<div id="viewport">
+  <div id="stage">
+    <div id="cockpit" data-mood="normal" data-phase="idle">
+
+      <!-- ambient light layers -->
+      <div class="ambient amb-glow"></div>
+      <div class="ambient amb-vignette"></div>
+      <div class="ambient amb-scanlines"></div>
+      <div class="ambient amb-mood"></div>
+
+      <!-- ===== TOP BAR ===== -->
+      <header id="topbar">
+        <div class="brand">
+          <div class="brand-mark"><span class="bm-wave"></span></div>
+          <div class="brand-text">
+            <div class="brand-name">SPEECHLESS</div>
+            <div class="brand-sub">Hybrid Voice Cockpit</div>
+          </div>
+        </div>
+
+        <div class="topbar-center">
+          <div class="sys-pill" id="pill-edge">
+            <span class="sp-dot"></span><span class="sp-label">EDGE</span><span class="sp-val" id="edge-health">READY</span>
+          </div>
+          <div class="link-anim" id="link-anim">
+            <span class="la-node"></span>
+            <span class="la-wire"></span>
+            <span class="la-node"></span>
+          </div>
+          <div class="sys-pill" id="pill-cloud">
+            <span class="sp-dot"></span><span class="sp-label">CLOUD</span><span class="sp-val" id="cloud-health">LINKED</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="conn-pill" id="conn-pill">
+            <div class="signal" id="signal">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="conn-meta">
+              <div class="conn-state" id="conn-state">ONLINE</div>
+              <div class="conn-lat" id="conn-lat">50 ms</div>
+            </div>
+          </div>
+          <div class="clock">
+            <div class="clock-time" id="clock-time">14:32</div>
+            <div class="clock-out" id="clock-out">18°C · Munich</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===== MAIN CLUSTER ===== -->
+      <main id="cluster">
+
+        <!-- LEFT : driving -->
+        <section id="left" class="zone">
+          <div class="speedo-wrap">
+            <svg id="speedo" viewBox="0 0 360 360" aria-hidden="true">
+              <defs>
+                <linearGradient id="speedArc" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0" stop-color="var(--mint)"/>
+                  <stop offset="0.6" stop-color="var(--ice)"/>
+                  <stop offset="1" stop-color="var(--cloud)"/>
+                </linearGradient>
+                <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="6" result="b"/>
+                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <!-- track -->
+              <path id="speed-track" class="gauge-track" fill="none" stroke-width="14" stroke-linecap="round"/>
+              <!-- ticks injected by JS -->
+              <g id="speed-ticks"></g>
+              <!-- progress -->
+              <path id="speed-fill" class="gauge-fill" fill="none" stroke="url(#speedArc)" stroke-width="14" stroke-linecap="round" filter="url(#softGlow)"/>
+              <!-- needle -->
+              <g id="speed-needle">
+                <line x1="180" y1="180" x2="180" y2="64" class="needle-line"/>
+              </g>
+              <circle cx="180" cy="180" r="9" class="needle-hub"/>
+              <circle cx="180" cy="180" r="4" class="needle-hub-in"/>
+            </svg>
+            <div class="speedo-center">
+              <div class="speed-num" id="speed-num">0</div>
+              <div class="speed-unit">km/h</div>
+              <div class="drive-mode" id="drive-mode"><span class="dm-gear">P</span><span class="dm-eco">PARK</span></div>
+            </div>
+          </div>
+
+          <!-- vehicle + ADAS surround -->
+          <div class="vehicle-panel">
+            <div class="vp-head"><span class="vp-title">VEHICLE · ADAS SURROUND</span><span class="vp-live">● MONITORING</span></div>
+            <div class="carview">
+              <div class="adas-rings"><span class="ar ar1"></span><span class="ar ar2"></span><span class="ar ar3"></span><span class="ar-ping"></span></div>
+            <svg id="car-svg" viewBox="0 0 200 300" aria-hidden="true">
+              <defs>
+                <linearGradient id="carBody" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#2c3a52"/>
+                  <stop offset="0.5" stop-color="#1b2433"/>
+                  <stop offset="1" stop-color="#10161f"/>
+                </linearGradient>
+                <linearGradient id="carRoof" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#2a3547"/>
+                  <stop offset="1" stop-color="#171f2b"/>
+                </linearGradient>
+                <radialGradient id="beamGrad" cx="50%" cy="100%" r="100%">
+                  <stop offset="0" stop-color="rgba(255,243,176,.5)"/>
+                  <stop offset="1" stop-color="rgba(255,243,176,0)"/>
+                </radialGradient>
+              </defs>
+              <!-- headlight beams -->
+              <g id="beams" class="beams">
+                <polygon points="58,30 30,-40 90,-40" class="beam"/>
+                <polygon points="142,30 110,-40 170,-40" class="beam"/>
+              </g>
+              <!-- wheels -->
+              <g id="wheels">
+                <rect class="wheel" id="wfl" x="34" y="66" width="16" height="40" rx="6"/>
+                <rect class="wheel" id="wfr" x="150" y="66" width="16" height="40" rx="6"/>
+                <rect class="wheel" x="34" y="196" width="16" height="40" rx="6"/>
+                <rect class="wheel" x="150" y="196" width="16" height="40" rx="6"/>
+              </g>
+              <!-- body -->
+              <g id="car-body">
+                <rect x="48" y="34" width="104" height="232" rx="40" class="body-base"/>
+                <rect x="48" y="34" width="104" height="232" rx="40" class="body-sheen"/>
+                <!-- windshield / roof -->
+                <rect x="62" y="92" width="76" height="60" rx="20" class="glass"/>
+                <rect x="60" y="158" width="80" height="70" rx="22" class="roof"/>
+                <rect x="64" y="232" width="72" height="26" rx="14" class="glass rear"/>
+                <!-- door lock seams -->
+                <line x1="48" y1="150" x2="40" y2="150" class="door-seam" id="door-l"/>
+                <line x1="152" y1="150" x2="160" y2="150" class="door-seam" id="door-r"/>
+              </g>
+              <!-- lights -->
+              <rect id="hl-l" x="56" y="30" width="20" height="8" rx="4" class="headlight"/>
+              <rect id="hl-r" x="124" y="30" width="20" height="8" rx="4" class="headlight"/>
+              <rect id="bl-l" x="58" y="262" width="18" height="7" rx="3.5" class="brakelight"/>
+              <rect id="bl-r" x="124" y="262" width="18" height="7" rx="3.5" class="brakelight"/>
+              <!-- hazards -->
+              <circle id="hz-fl" cx="52" cy="44" r="4" class="hazard"/>
+              <circle id="hz-fr" cx="148" cy="44" r="4" class="hazard"/>
+              <circle id="hz-rl" cx="52" cy="256" r="4" class="hazard"/>
+              <circle id="hz-rr" cx="148" cy="256" r="4" class="hazard"/>
+            </svg>
+            </div>
+            <div class="chips">
+            <div class="chip" id="chip-climate">
+              <div class="chip-ic">❄</div>
+              <div class="chip-body"><div class="chip-val" id="val-temp">22°</div><div class="chip-lab">Cabin</div></div>
+            </div>
+            <div class="chip" id="chip-lights">
+              <div class="chip-ic">☀</div>
+              <div class="chip-body"><div class="chip-val" id="val-lights">OFF</div><div class="chip-lab">Lights</div></div>
+            </div>
+            <div class="chip" id="chip-doors">
+              <div class="chip-ic">⌷</div>
+              <div class="chip-body"><div class="chip-val" id="val-doors">LOCK</div><div class="chip-lab">Doors</div></div>
+            </div>
+            <div class="chip" id="chip-steer">
+              <div class="chip-ic">◷</div>
+              <div class="chip-body"><div class="chip-val" id="val-steer">0°</div><div class="chip-lab">Steering</div></div>
+            </div>
+          </div>
+          </div>
+        </section>
+
+        <!-- CENTER : voice + routing -->
+        <section id="center" class="zone">
+          <div class="orb-stage">
+            <div class="orb" id="orb">
+              <div class="orb-core"></div>
+              <div class="orb-ring r1"></div>
+              <div class="orb-ring r2"></div>
+              <div class="orb-ring r3"></div>
+              <div class="orb-wave" id="orb-wave"></div>
+            </div>
+            <div class="orb-status" id="orb-status">STANDBY</div>
+            <div class="local-badge" id="local-badge">◍ LOCAL PROCESSING</div>
+          </div>
+
+          <div class="convo" id="convo">
+            <div class="convo-driver" id="convo-driver">
+              <span class="cd-tag">DRIVER</span>
+              <span class="cd-text" id="driver-text">—</span>
+            </div>
+            <div class="convo-assistant" id="convo-assistant">
+              <span class="ca-text" id="assistant-text">Tap Start, or press Space — I'm listening.</span>
+            </div>
+          </div>
+
+          <!-- routing flow -->
+          <div class="routing" id="routing">
+            <div class="rt-node rt-voice">
+              <div class="rtn-ic">🎙</div><div class="rtn-lab">Voice</div>
+            </div>
+            <div class="rt-wire rt-wire-in"><span class="pkt" id="pkt-in"></span></div>
+            <div class="rt-node rt-router" id="rt-router">
+              <div class="rtn-ic">⧉</div><div class="rtn-lab">Router</div>
+              <div class="rtn-meta" id="router-intent">intent</div>
+            </div>
+            <div class="rt-split">
+              <div class="rt-branch branch-edge" id="branch-edge">
+                <div class="rt-wire"><span class="pkt" id="pkt-edge"></span></div>
+                <div class="rt-node rt-dest">
+                  <div class="rtn-ic">▤</div>
+                  <div class="rtn-lab">EDGE</div>
+                  <div class="rtn-sub">on-device</div>
+                </div>
+              </div>
+              <div class="rt-branch branch-cloud" id="branch-cloud">
+                <div class="rt-wire"><span class="pkt" id="pkt-cloud"></span></div>
+                <div class="rt-node rt-dest">
+                  <div class="rtn-ic">☁</div>
+                  <div class="rtn-lab">CLOUD</div>
+                  <div class="rtn-sub">Bedrock</div>
+                </div>
+              </div>
+            </div>
+            <div class="rt-readout">
+              <div class="rt-chip" id="rt-route"><span class="rtc-k">ROUTE</span><span class="rtc-v">—</span></div>
+              <div class="rt-chip" id="rt-lat"><span class="rtc-k">LATENCY</span><span class="rtc-v">—</span></div>
+              <div class="rt-chip" id="rt-crit"><span class="rtc-k">CLASS</span><span class="rtc-v">—</span></div>
+              <div class="rt-chip rt-fallback" id="rt-fallback"><span class="rtc-v">⚠ FALLBACK → EDGE</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT : nav + telemetry -->
+        <section id="right" class="zone">
+          <div class="nav-card">
+            <div class="nav-head">
+              <div class="nav-dest" id="nav-dest">Pasta Perfetto</div>
+              <div class="nav-eta"><span id="nav-eta-min">18</span><span class="ne-u">min</span></div>
+            </div>
+            <div class="nav-map">
+              <svg id="map-svg" viewBox="0 0 360 240" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <linearGradient id="mapLand" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#262b33"/>
+                    <stop offset="1" stop-color="#1f242b"/>
+                  </linearGradient>
+                  <filter id="routeGlow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="3" result="b"/>
+                    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                  <filter id="pinShadow" x="-60%" y="-60%" width="220%" height="220%">
+                    <feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#000" flood-opacity="0.55"/>
+                  </filter>
+                </defs>
+
+                <!-- land -->
+                <rect x="0" y="0" width="360" height="240" fill="url(#mapLand)"/>
+
+                <!-- water -->
+                <path class="map-water" d="M -5 245 C 40 220 60 205 58 175 C 56 150 20 150 6 158 C -10 168 -8 210 -5 245 Z"/>
+                <path class="map-water" d="M 300 -5 C 320 18 352 22 365 14 L 365 -8 Z"/>
+                <!-- parks -->
+                <rect class="map-park" x="196" y="14" width="92" height="48" rx="9"/>
+                <rect class="map-park" x="18" y="36" width="46" height="40" rx="8"/>
+                <!-- building blocks -->
+                <g class="map-blocks">
+                  <rect x="150" y="150" width="26" height="20" rx="3"/><rect x="182" y="152" width="20" height="16" rx="3"/>
+                  <rect x="150" y="176" width="22" height="18" rx="3"/><rect x="178" y="176" width="26" height="20" rx="3"/>
+                  <rect x="212" y="120" width="22" height="18" rx="3"/><rect x="240" y="118" width="18" height="16" rx="3"/>
+                  <rect x="120" y="40" width="20" height="16" rx="3"/><rect x="146" y="44" width="22" height="18" rx="3"/>
+                  <rect x="300" y="120" width="20" height="16" rx="3"/><rect x="326" y="118" width="18" height="18" rx="3"/>
+                  <rect x="300" y="142" width="22" height="16" rx="3"/>
+                </g>
+
+                <!-- highway under the route (casing + fill) -->
+                <path class="rd-case" d="M 28 210 C 90 200 70 130 140 120 S 250 150 270 96 S 320 60 336 36" fill="none"/>
+                <path class="rd-highway" d="M 28 210 C 90 200 70 130 140 120 S 250 150 270 96 S 320 60 336 36" fill="none"/>
+
+                <!-- arterials (casing + fill) -->
+                <g class="rd-case-g">
+                  <path d="M -5 130 C 70 126 120 134 175 130 S 290 122 365 128" fill="none"/>
+                  <path d="M 92 -5 C 98 60 86 120 104 182 S 150 236 150 246" fill="none"/>
+                  <path d="M 365 152 C 300 166 250 176 200 200 S 120 236 60 246" fill="none"/>
+                </g>
+                <g class="rd-arterial-g">
+                  <path d="M -5 130 C 70 126 120 134 175 130 S 290 122 365 128" fill="none"/>
+                  <path d="M 92 -5 C 98 60 86 120 104 182 S 150 236 150 246" fill="none"/>
+                  <path d="M 365 152 C 300 166 250 176 200 200 S 120 236 60 246" fill="none"/>
+                </g>
+                <!-- minor roads -->
+                <g class="rd-minor-g">
+                  <path d="M 175 130 L 204 70" fill="none"/><path d="M 204 70 L 252 78" fill="none"/>
+                  <path d="M 104 182 L 150 152 L 175 130" fill="none"/><path d="M 252 78 L 292 44" fill="none"/>
+                  <path d="M 60 104 L 92 66" fill="none"/><path d="M 300 128 L 336 138" fill="none"/>
+                  <path d="M 312 112 L 312 168" fill="none"/><path d="M 226 120 L 238 156" fill="none"/>
+                </g>
+
+                <!-- route casing + planned + traversed -->
+                <path class="route-case" d="M 28 210 C 90 200 70 130 140 120 S 250 150 270 96 S 320 60 336 36" fill="none"/>
+                <path id="route-bg" class="route-bg" d="M 28 210 C 90 200 70 130 140 120 S 250 150 270 96 S 320 60 336 36" fill="none"/>
+                <path id="route-done" class="route-done" d="M 28 210 C 90 200 70 130 140 120 S 250 150 270 96 S 320 60 336 36" fill="none" filter="url(#routeGlow)"/>
+                <!-- tunnel segment -->
+                <path id="tunnel-seg" class="tunnel-seg" d="M 140 120 C 200 112 250 150 270 96" fill="none"/>
+
+                <!-- road label -->
+                <g class="rd-shield" transform="translate(196,150)"><rect x="-12" y="-9" width="24" height="18" rx="4"/><text x="0" y="1">A9</text></g>
+
+                <!-- POIs (Apple-style category badges) -->
+                <g id="poi-food" class="poi poi-food" data-x="140" data-y="120"><circle class="poi-bg" r="10"/><text>🍝</text></g>
+                <g id="poi-gas" class="poi poi-gas" data-x="270" data-y="96"><circle class="poi-bg" r="10"/><text>⛽</text></g>
+                <g id="poi-hosp" class="poi poi-hosp" data-x="312" data-y="56"><circle class="poi-bg" r="10"/><text>✚</text></g>
+
+                <!-- car marker (Apple location dot) -->
+                <g id="map-car"><circle r="11" class="mc-halo"/><circle r="6" class="mc-ring"/><circle r="4.5" class="mc-dot"/></g>
+              </svg>
+              <div class="nav-overlay">
+                <div class="nav-ov-item"><span id="nav-dist">14.2</span> km</div>
+                <div class="nav-ov-sep"></div>
+                <div class="nav-ov-item" id="nav-next">via A9</div>
+              </div>
+              <div class="tunnel-banner" id="tunnel-banner">ENTERING TUNNEL · NO SIGNAL</div>
+            </div>
+          </div>
+
+          <div class="tele-grid">
+            <div class="tele-card" id="tele-fuel">
+              <div class="tc-head"><span class="tc-lab">FUEL</span><span class="tc-val" id="fuel-pct">15%</span></div>
+              <div class="fuel-bar"><div class="fuel-fill" id="fuel-fill"></div><div class="fuel-reserve"></div></div>
+              <div class="tc-foot"><span>Range</span><span id="fuel-range">~88 km</span></div>
+            </div>
+            <div class="tele-card" id="tele-hr">
+              <div class="tc-head"><span class="tc-lab">HEART RATE</span><span class="tc-val"><span id="hr-bpm">72</span> <small>bpm</small></span></div>
+              <svg class="ecg" viewBox="0 0 200 56" preserveAspectRatio="none">
+                <polyline id="ecg-line" class="ecg-line" points=""/>
+              </svg>
+              <div class="tc-foot"><span id="hr-state">Normal</span><span class="hr-driver">Driver · Row 1</span></div>
+            </div>
+            <div class="tele-card tele-wide" id="tele-gps">
+              <div class="tc-head"><span class="tc-lab">VEHICLE LOCATION · VSS</span><span class="tc-val gps-live">LIVE</span></div>
+              <div class="gps-row"><span class="gps-co" id="gps-lat">48.1351° N</span><span class="gps-co" id="gps-lon">11.5820° E</span><span class="gps-co" id="gps-cons">8.5 L/100km</span></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- ===== BOTTOM RAIL ===== -->
+      <footer id="rail">
+        <div class="rail-block stats-block">
+          <div class="stat"><div class="stat-v" id="stat-total">0</div><div class="stat-l">Commands</div></div>
+          <div class="stat"><div class="stat-v stat-edge" id="stat-edge">0</div><div class="stat-l">Edge</div></div>
+          <div class="stat"><div class="stat-v stat-cloud" id="stat-cloud">0</div><div class="stat-l">Cloud</div></div>
+          <div class="stat"><div class="stat-v" id="stat-lat">0<small>ms</small></div><div class="stat-l">Avg latency</div></div>
+          <div class="stat"><div class="stat-v stat-ok" id="stat-success">100<small>%</small></div><div class="stat-l">Success</div></div>
+        </div>
+
+        <div class="rail-block vss-block">
+          <div class="vss-head"><span class="vss-dot"></span>KUKSA DATABROKER · VSS <span class="vss-ep">gRPC :55555</span></div>
+          <div class="vss-ticker" id="vss-ticker"></div>
+        </div>
+
+        <div class="rail-block net-block">
+          <div class="net-head">NETWORK</div>
+          <svg class="net-spark" id="net-spark" viewBox="0 0 160 40" preserveAspectRatio="none">
+            <polyline id="net-line" class="net-line" points=""/>
+          </svg>
+          <div class="net-foot"><span id="net-cond">Excellent</span><span id="net-loss">0.0% loss</span></div>
+        </div>
+      </footer>
+
+      <!-- emergency banner -->
+      <div id="alert-banner">
+        <div class="ab-pulse"></div>
+        <div class="ab-ic">♥</div>
+        <div class="ab-text">
+          <div class="ab-title" id="ab-title">ELEVATED HEART RATE — 185 BPM</div>
+          <div class="ab-sub" id="ab-sub">Routing to nearest hospital · Klinikum München · ETA 8 min</div>
+        </div>
+      </div>
+
+      <!-- scene label -->
+      <div id="scene-tag"><span id="scene-idx">00</span><span class="st-name" id="scene-name">Standby</span></div>
+
+      <!-- start overlay -->
+      <div id="start-overlay">
+        <div class="so-card">
+          <div class="so-orb"><div class="orb-core"></div><div class="orb-ring r1"></div><div class="orb-ring r2"></div></div>
+          <div class="so-title">SPEECHLESS</div>
+          <div class="so-sub">Edge ↔ Cloud Hybrid Voice Cockpit</div>
+          <button id="start-btn">▶ Start Demo</button>
+          <div class="so-keys"><kbd>Space</kbd> start / pause &nbsp;·&nbsp; <kbd>→</kbd> next &nbsp;·&nbsp; <kbd>R</kbd> reset</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="scenario.js"></script>
+<script src="cockpit.js"></script>
+</body>
+</html>

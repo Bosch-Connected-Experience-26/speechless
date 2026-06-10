@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Speechless Visual Dashboard — Entry Point.
+"""Speechless Cockpit — Entry Point.
 
-Starts the Flask web dashboard for the voice assistant demo.
+Starts the Flask web server for the Speechless Cockpit demo dashboard.
 
 Usage:
     uv run python scripts/run_dashboard.py
     # Then open http://localhost:5001 in your browser
-    # Click "Start Demo" to run the scripted scenario
+    # Press Space (or click "Start Demo") to run the scripted scenario
 """
 
 import sys
@@ -24,16 +24,16 @@ def main() -> None:
     """Start the dashboard server."""
     print()
     print("=" * 60)
-    print("  SPEECHLESS — Visual Voice Assistant Dashboard")
+    print("  SPEECHLESS COCKPIT — Hybrid Voice Cockpit Demo")
     print("  Team LosRudos | Hackathon 2025")
     print("=" * 60)
     print()
-    print("  🌐 Dashboard:  http://localhost:5001")
+    print("  🌐 Cockpit:    http://localhost:5001")
     print("  📊 API State:  http://localhost:5001/api/state")
     print("  ▶  Start Demo: http://localhost:5001/api/start-demo")
     print()
-    print("  Open the dashboard URL in your browser,")
-    print("  then click 'Start Demo' to run the scenario.")
+    print("  Open the cockpit URL in your browser, then press")
+    print("  Space (or click 'Start Demo') to run the scenario.")
     print()
     print("=" * 60)
     print()
