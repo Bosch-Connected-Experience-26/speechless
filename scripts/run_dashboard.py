@@ -12,10 +12,10 @@ Usage:
 import sys
 from pathlib import Path
 
-# Ensure src/ is on the path when running directly
-src_path = str(Path(__file__).resolve().parent.parent / "src")
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
+# Ensure the project root is on the path when running directly
+project_root = str(Path(__file__).resolve().parent.parent)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 from speechless.dashboard.app import create_app
 

@@ -2,7 +2,7 @@
 
 ## Strategy
 
-**Do NOT `git merge`.** The branches have incompatible structures (`src/alpacai/core/` vs `src/speechless/`). Instead, cherry-pick useful concepts and port them into the existing architecture.
+**Do NOT `git merge`.** The branches have incompatible structures (`src/alpacai/core/` vs `speechless/`). Instead, cherry-pick useful concepts and port them into the existing architecture.
 
 ---
 
@@ -10,10 +10,10 @@
 
 | From Hybrid Branch | Port Into | Priority |
 |-------------------|-----------|----------|
-| `SimulatedVehicleControl` (in-memory vehicle state) | `src/speechless/edge/simulated_vehicle.py` | HIGH — needed for demo |
-| `CommandSafetyCriticality` enum + tiered routing | `src/speechless/router/classifier.py` | MEDIUM — enriches demo narrative |
-| `NetworkMonitor.update_metrics()` (latency/packet loss) | `src/speechless/connectivity/monitor.py` | LOW — optional for demo simulation |
-| Decision logging + `get_stats()` | `src/speechless/utils/logging.py` / `main.py` | HIGH — demo summary output |
+| `SimulatedVehicleControl` (in-memory vehicle state) | `speechless/edge/simulated_vehicle.py` | HIGH — needed for demo |
+| `CommandSafetyCriticality` enum + tiered routing | `speechless/router/classifier.py` | MEDIUM — enriches demo narrative |
+| `NetworkMonitor.update_metrics()` (latency/packet loss) | `speechless/connectivity/monitor.py` | LOW — optional for demo simulation |
+| Decision logging + `get_stats()` | `speechless/utils/logging.py` / `main.py` | HIGH — demo summary output |
 | Demo runner script pattern (async scenarios) | `scripts/run_demo.py` | HIGH — the actual demo |
 | Architecture ASCII diagram | Already in `docs/demo_script.md` | DONE |
 
@@ -35,7 +35,7 @@
 
 ### Step 1: Create SimulatedVehicleControl
 
-**File:** `src/speechless/edge/simulated_vehicle.py`
+**File:** `speechless/edge/simulated_vehicle.py`
 
 Port the in-memory state machine from the hybrid branch's `vehicle_control.py`. Adapt to accept `VehicleIntent` objects (our existing type) instead of raw strings.
 
@@ -68,7 +68,7 @@ class SimulatedVehicleControl:
 
 ### Step 2: Add Safety Criticality to Router
 
-**File:** `src/speechless/router/classifier.py`
+**File:** `speechless/router/classifier.py`
 
 Add:
 ```python
@@ -94,7 +94,7 @@ All current vehicle control commands → `HIGH_PRIORITY`. Informational → `NOR
 
 ### Step 3: Add Performance Tracking to Pipeline
 
-**File:** `src/speechless/main.py`
+**File:** `speechless/main.py`
 
 Add to `PipelineOrchestrator`:
 ```python

@@ -1507,7 +1507,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/speechless"]
+packages = ["speechless"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

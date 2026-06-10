@@ -21,37 +21,37 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
     - _Requirements: 6.1, 6.2_
 
   - [x] 1.3 Create project directory structure and core modules
-    - Create src/speechless/ package with all subpackages: speech, router, edge, cloud, connectivity, context, telemetry, routing, response, utils
+    - Create speechless/ package with all subpackages: speech, router, edge, cloud, connectivity, context, telemetry, routing, response, utils
     - Create __init__.py files for all packages
     - _Requirements: 5.1_
 
   - [x] 1.4 Implement data models and configuration
-    - Create src/speechless/models.py with PipelineState, ProcessingMode, PipelineContext, AppConfig dataclasses
-    - Create src/speechless/config.py loading config from environment variables with defaults for edge_target, bedrock_profile "losrudos", kuksa_host, ping_url, thresholds
+    - Create speechless/models.py with PipelineState, ProcessingMode, PipelineContext, AppConfig dataclasses
+    - Create speechless/config.py loading config from environment variables with defaults for edge_target, bedrock_profile "losrudos", kuksa_host, ping_url, thresholds
     - _Requirements: 5.1, 7.4, 8.1_
 
   - [x] 1.5 Implement utility modules (retry with exponential backoff, structured logging)
-    - Create src/speechless/utils/retry.py with RetryConfig, compute_backoff_delay, retry_sync functions
-    - Create src/speechless/utils/logging.py with CommandLogEntry dataclass and CommandLogger class
+    - Create speechless/utils/retry.py with RetryConfig, compute_backoff_delay, retry_sync functions
+    - Create speechless/utils/logging.py with CommandLogEntry dataclass and CommandLogger class
     - Ensure log entries contain: timestamp, transcription, classification, routing_decision, execution_outcome, connectivity_state
     - _Requirements: 5.4, 6.4_
 
 - [x] 2. Speech Engine (local STT + cloud fallback)
   - [x] 2.1 Implement audio capture module
-    - Create src/speechless/speech/capture.py with AudioCapture class using sounddevice
+    - Create speechless/speech/capture.py with AudioCapture class using sounddevice
     - Support configurable sample rate (16kHz default) and chunk duration
     - Return AudioSegment dataclass with samples, sample_rate, duration_seconds
     - _Requirements: 1.1_
 
   - [x] 2.2 Implement local Whisper STT
-    - Create src/speechless/speech/stt_local.py with LocalSTT class using faster-whisper
+    - Create speechless/speech/stt_local.py with LocalSTT class using faster-whisper
     - Implement transcribe() returning TranscriptionResult with text, confidence, source
     - Implement is_below_threshold() for confidence checking
     - Include _logprob_to_confidence conversion
     - _Requirements: 1.1, 1.2_
 
   - [x] 2.3 Implement cloud STT fallback
-    - Create src/speechless/speech/stt_cloud.py using openai Whisper API
+    - Create speechless/speech/stt_cloud.py using openai Whisper API
     - Implement fallback logic: trigger when local confidence < threshold
     - If cloud unavailable, return local result regardless of confidence
     - Ensure transcription result passes to Command Router within 500ms target (soft deadline — always deliver)
@@ -64,7 +64,7 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 3. Command Router (keyword classification)
   - [x] 3.1 Implement command classifier
-    - Create src/speechless/router/classifier.py with CommandCategory enum, ClassificationResult, CommandClassifier
+    - Create speechless/router/classifier.py with CommandCategory enum, ClassificationResult, CommandClassifier
     - Implement keyword-based classification with VEHICLE_KEYWORDS set
     - Route vehicle_control → "edge", informational → "cloud"
     - Default to "cloud" when confidence is below ambiguity threshold
@@ -83,13 +83,13 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 4. Edge Processor (intent parser + vehicle controller + Kuksa gRPC)
   - [x] 4.1 Implement intent parser
-    - Create src/speechless/edge/intent_parser.py with VehicleSystem, Action enums, VehicleIntent dataclass
+    - Create speechless/edge/intent_parser.py with VehicleSystem, Action enums, VehicleIntent dataclass
     - Implement parse() method detecting HVAC, windows, doors, lights keywords
     - Extract parameters (temperature values, open/close/lock/unlock actions)
     - _Requirements: 3.1, 3.3_
 
   - [x] 4.2 Implement vehicle controller with Kuksa gRPC integration
-    - Create src/speechless/edge/vehicle_controller.py with VSSSignal, ActuationResult dataclasses
+    - Create speechless/edge/vehicle_controller.py with VSSSignal, ActuationResult dataclasses
     - Implement VSS_MAPPING dictionary for intent → signal path translation
     - Implement intent_to_signal() mapping VehicleIntent to VSSSignal
     - Implement format_vss_path() validation (must start with "Vehicle.", ≥3 segments)
@@ -127,7 +127,7 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 6. Edge LLM Client (OpenAI-compatible, dual targets)
   - [x] 6.1 Implement Edge LLM client
-    - Create src/speechless/edge/edge_llm.py with EdgeLLMConfig, EdgeLLMResponse, EdgeLLMClient
+    - Create speechless/edge/edge_llm.py with EdgeLLMConfig, EdgeLLMResponse, EdgeLLMClient
     - Use openai client library with configurable base_url (LM Studio localhost:1234/v1 or Jetson endpoint)
     - Implement validate_connectivity() checking endpoint readiness within 3 seconds
     - Implement generate() using chat.completions.create with OpenAI format
@@ -142,7 +142,7 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 7. Cloud Processor (AWS Bedrock converse API)
   - [x] 7.1 Implement Bedrock client
-    - Create src/speechless/cloud/bedrock_client.py with BedrockResponse, ConversationMessage, BedrockClient
+    - Create speechless/cloud/bedrock_client.py with BedrockResponse, ConversationMessage, BedrockClient
     - Use boto3.Session(profile_name="losrudos") for authentication
     - Implement converse() method using Bedrock converse API with message history
     - Implement inject_context() for offline context forwarding
@@ -162,7 +162,7 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 8. Connectivity Monitor (periodic ping, mode switching)
   - [x] 8.1 Implement connectivity monitor
-    - Create src/speechless/connectivity/monitor.py with ConnectivityState, ConnectivityConfig, ConnectivityMonitor
+    - Create speechless/connectivity/monitor.py with ConnectivityState, ConnectivityConfig, ConnectivityMonitor
     - Use httpx for periodic ping to configurable URL (default: Google generate_204)
     - Implement async check_connectivity() and run() loop with configurable interval (3s)
     - Fire on_state_change callback on transitions (ONLINE↔OFFLINE)
@@ -176,7 +176,7 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 9. Conversation Context Manager (offline multi-turn history)
   - [x] 9.1 Implement conversation context manager
-    - Create src/speechless/context/conversation.py with ConversationTurn, ConversationContext
+    - Create speechless/context/conversation.py with ConversationTurn, ConversationContext
     - Implement add_turn() with max_turns trimming (default 20)
     - Implement get_messages_for_llm() (OpenAI format) and get_messages_for_bedrock() (ConversationMessage format)
     - Support minimum 5 consecutive follow-up turns
@@ -198,7 +198,7 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 11. Telemetry Reader (GPS, fuel, consumption from Kuksa VSS)
   - [x] 11.1 Implement telemetry reader
-    - Create src/speechless/telemetry/reader.py with VehicleTelemetry dataclass, TelemetryReader class
+    - Create speechless/telemetry/reader.py with VehicleTelemetry dataclass, TelemetryReader class
     - Define VSS_PATHS mapping for latitude, longitude, fuel_level, fuel_consumption, heart_rate
     - Implement async read_gps(), read_fuel_level(), read_fuel_consumption(), read_heart_rate(), read_all()
     - Handle read failures gracefully (return None)
@@ -206,7 +206,7 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 12. Route Planner (fuel-aware reachability, multi-constraint routing)
   - [x] 12.1 Implement route planner
-    - Create src/speechless/routing/planner.py with GeoPoint, RouteConstraint, RouteOption, RoutePlanner
+    - Create speechless/routing/planner.py with GeoPoint, RouteConstraint, RouteOption, RoutePlanner
     - Implement compute_range_km() from fuel level and consumption rate
     - Implement is_reachable() checking destination within fuel range
     - Implement compute_distance_km() using Haversine formula
@@ -238,7 +238,7 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 13. Biometric Monitor (heart rate, emergency threshold, auto-routing)
   - [x] 13.1 Implement biometric monitor
-    - Create src/speechless/telemetry/biometric.py with BiometricConfig, BiometricMonitor
+    - Create speechless/telemetry/biometric.py with BiometricConfig, BiometricMonitor
     - Implement is_critical() checking HR ≥ threshold (default 180 BPM)
     - Implement async run() loop sampling every 5 seconds
     - Fire on_emergency callback when threshold exceeded
@@ -257,7 +257,7 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 14. Response Engine (TTS, confirmations, error announcements)
   - [x] 14.1 Implement response engine with TTS
-    - Create src/speechless/response/tts.py with ResponseEngine class using pyttsx3
+    - Create speechless/response/tts.py with ResponseEngine class using pyttsx3
     - Implement speak() for text-to-speech output
     - Implement confirm_actuation() for vehicle control success messages
     - Implement announce_error() for failure descriptions
@@ -266,7 +266,7 @@ Implement the Speechless edge-first voice assistant with connectivity-aware proc
 
 - [x] 15. Pipeline Orchestrator (wires all components, mode-aware routing, state machine)
   - [x] 15.1 Implement pipeline orchestrator and main entry point
-    - Create src/speechless/main.py wiring all components together
+    - Create speechless/main.py wiring all components together
     - Implement PipelineState state machine: IDLE → LISTENING → TRANSCRIBING → CLASSIFYING → EXECUTING → RESPONDING
     - Implement mode-aware routing: ONLINE+VEHICLE_CONTROL→Edge, ONLINE+INFORMATIONAL→Cloud, OFFLINE+any→EdgeLLM
     - Integrate Connectivity Monitor callbacks for mode switching
