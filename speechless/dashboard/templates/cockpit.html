@@ -144,16 +144,18 @@
                 <line x1="48" y1="150" x2="40" y2="150" class="door-seam" id="door-l"/>
                 <line x1="152" y1="150" x2="160" y2="150" class="door-seam" id="door-r"/>
               </g>
-              <!-- lights -->
-              <rect id="hl-l" x="56" y="30" width="20" height="8" rx="4" class="headlight"/>
-              <rect id="hl-r" x="124" y="30" width="20" height="8" rx="4" class="headlight"/>
-              <rect id="bl-l" x="58" y="262" width="18" height="7" rx="3.5" class="brakelight"/>
-              <rect id="bl-r" x="124" y="262" width="18" height="7" rx="3.5" class="brakelight"/>
-              <!-- hazards -->
-              <circle id="hz-fl" cx="52" cy="44" r="4" class="hazard"/>
-              <circle id="hz-fr" cx="148" cy="44" r="4" class="hazard"/>
-              <circle id="hz-rl" cx="52" cy="256" r="4" class="hazard"/>
-              <circle id="hz-rr" cx="148" cy="256" r="4" class="hazard"/>
+              <g id="vehicle-lighting">
+                <!-- lights -->
+                <rect id="hl-l" x="56" y="30" width="20" height="8" rx="4" class="headlight"/>
+                <rect id="hl-r" x="124" y="30" width="20" height="8" rx="4" class="headlight"/>
+                <rect id="bl-l" x="58" y="262" width="18" height="7" rx="3.5" class="brakelight"/>
+                <rect id="bl-r" x="124" y="262" width="18" height="7" rx="3.5" class="brakelight"/>
+                <!-- hazards -->
+                <circle id="hz-fl" cx="52" cy="44" r="4" class="hazard"/>
+                <circle id="hz-fr" cx="148" cy="44" r="4" class="hazard"/>
+                <circle id="hz-rl" cx="52" cy="256" r="4" class="hazard"/>
+                <circle id="hz-rr" cx="148" cy="256" r="4" class="hazard"/>
+              </g>
             </svg>
             </div>
             <div class="chips">
@@ -198,6 +200,23 @@
             </div>
             <div class="convo-assistant" id="convo-assistant">
               <span class="ca-text" id="assistant-text">Tap Start, or press Space — I'm listening.</span>
+            </div>
+          </div>
+
+          <div class="interactive-panel" id="interactive-panel" hidden>
+            <form class="command-form" id="command-form">
+              <input id="command-input" type="text" autocomplete="off" placeholder="Type a command or question" />
+              <button class="command-btn send" id="send-command" type="submit" title="Send command">↵</button>
+              <button class="command-btn mic" id="mic-btn" type="button" title="Record voice command">●</button>
+              <button class="command-btn upload" id="audio-upload-btn" type="button" title="Upload audio file">⇧</button>
+              <button class="command-btn reset" id="reset-live" type="button" title="Reset session">↺</button>
+              <input id="audio-file-input" type="file" accept="audio/wav,audio/x-wav,audio/*" hidden />
+            </form>
+            <div class="provider-row">
+              <span id="mode-chip">INTERACTIVE</span>
+              <span id="backend-chip">BACKEND kuksa</span>
+              <span id="asr-chip">ASR local</span>
+              <span id="tts-chip">TTS local</span>
             </div>
           </div>
 
@@ -362,7 +381,7 @@
         </div>
 
         <div class="rail-block vss-block">
-          <div class="vss-head"><span class="vss-dot"></span>KUKSA DATABROKER · VSS <span class="vss-ep">gRPC :55555</span></div>
+          <div class="vss-head"><span class="vss-dot"></span>KUKSA DATABROKER · VSS <span class="vss-ep">gRPC :55556</span></div>
           <div class="vss-ticker" id="vss-ticker"></div>
         </div>
 

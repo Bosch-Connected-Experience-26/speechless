@@ -40,7 +40,7 @@ class TelemetryReader:
         "heart_rate": "Vehicle.Occupant.Driver.HeartRate",
     }
 
-    def __init__(self, kuksa_host: str = "localhost", kuksa_port: int = 55555):
+    def __init__(self, kuksa_host: str = "localhost", kuksa_port: int = 55556):
         self.kuksa_host = kuksa_host
         self.kuksa_port = kuksa_port
         self._client: Any = None

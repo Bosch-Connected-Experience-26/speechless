@@ -9,6 +9,11 @@ const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
 const lerp = (a,b,t) => a + (b-a)*t;
 const delay = ms => new Promise(r => setTimeout(r, ms));
 const pad2 = n => String(n).padStart(2,'0');
+let dashboardMode='demo';
+let runtimeConfig=null;
+let liveStatePoll=null;
+let lastRoutingKey='';
+let lastOperationsKey='';
 
 /* ---------- scale stage to viewport ---------- */
 const stage = $('#stage');
@@ -132,7 +137,11 @@ function frame(now){
   disp.speed = lerp(disp.speed, target.speed, 1-Math.pow(0.001,dt));
   disp.steer = lerp(disp.steer, target.steer, 1-Math.pow(0.0005,dt));
   renderSpeed(disp.speed);
-  $('#car-body').style.transform = `rotate(${(disp.steer*0.32).toFixed(2)}deg)`;
+  const bodyTurn = disp.steer*0.32;
+  const bodyRotate = `rotate(${bodyTurn.toFixed(2)} 100 150)`;
+  $('#car-body').style.transform = `rotate(${bodyTurn.toFixed(2)}deg)`;
+  $('#vehicle-lighting').setAttribute('transform', bodyRotate);
+  $('#beams').setAttribute('transform', `${bodyRotate} rotate(${(disp.steer*0.55).toFixed(2)} 100 34)`);
   const wr=`rotate(${(disp.steer*0.8).toFixed(2)}deg)`;
   $('#wfl').style.transform=wr; $('#wfr').style.transform=wr;
   $('#val-steer').textContent = `${Math.round(disp.steer)}°`;
@@ -342,8 +351,15 @@ async function apply(step){
       setPhase('listening'); setOrbStatus('LISTENING');
       await type($('#driver-text'), step.text, 40);
       break;
-    case 'route': await doRoute(step); break;
+    case 'route':
+      lastRouteMode=step.to || null;
+      await doRoute(step);
+      if(step.to==='cloud') await sleep(CLOUD_ROUTE_PAUSE);
+      break;
     case 'assistant':
+      setPhase('thinking');
+      setOrbStatus(lastRouteMode==='cloud'?'CLOUD RESPONSE':'FORMULATING');
+      await sleep(ASSISTANT_REPLY_PAUSE + (lastRouteMode==='cloud'?CLOUD_REPLY_PAUSE:0));
       setPhase('speaking'); setOrbStatus('SPEAKING');
       await type($('#assistant-text'), step.text, 36);
       setPhase('idle'); setOrbStatus('READY');
@@ -368,8 +384,12 @@ async function apply(step){
    RUNNER (play / pause / skip / reset)
    ============================================================ */
 const SCEN = window.SPEECHLESS_SCENARIO;
-const DWELL_SCALE = 1.8;   // pacing — stretches read/narration pauses (target 2.5 min)
+const DWELL_SCALE = 1.8;   // baseline read/narration pacing
+const ASSISTANT_REPLY_PAUSE = 1000;
+const CLOUD_ROUTE_PAUSE = 2600;
+const CLOUD_REPLY_PAUSE = 1600;
 let idx=0, running=false, paused=false;
+let lastRouteMode=null;
 let skipResolve=null, resumeResolve=null, sleepTimer=null;
 
 function sleep(ms){
@@ -408,6 +428,14 @@ function showOverlay(){
 function start(){
   hideOverlay();
   $('#scene-tag').classList.add('show');
+  if(dashboardMode==='interactive'){
+    setScene(0,'Interactive');
+    setOrbStatus('READY');
+    setPhase('idle');
+    startStatePolling();
+    $('#command-input')?.focus();
+    return;
+  }
   if(running) return;
   if(idx===0){ setOrbStatus('STANDBY'); }
   if(liveBackend) fetch('/api/start-demo').catch(()=>{});
@@ -432,6 +460,7 @@ function finish(){
 
 function reset(){
   running=false; paused=false; idx=0;
+  lastRouteMode=null;
   if(skipResolve){ skipResolve(); } if(resumeResolve){ resumeResolve(); resumeResolve=null; }
   clearTimeout(sleepTimer);
   // state
@@ -460,20 +489,326 @@ function reset(){
 /* ---------- controls ---------- */
 $('#start-btn').addEventListener('click', start);
 addEventListener('keydown', e=>{
+  if(e.target && ['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
   if(e.code==='Space'){ e.preventDefault(); togglePause(); }
   else if(e.code==='ArrowRight'){ e.preventDefault(); next(); }
-  else if(e.key==='r' || e.key==='R'){ e.preventDefault(); reset(); }
+  else if(e.key==='r' || e.key==='R'){
+    e.preventDefault();
+    if(dashboardMode==='interactive') resetInteractive();
+    else reset();
+  }
 });
 
 /* ============================================================
-   LIVE BACKEND detection (optional — visuals stay scripted)
+   LIVE BACKEND / INTERACTIVE MODE
    ============================================================ */
 let liveBackend=false;
 async function detectBackend(){
   try{
-    const r=await fetch('/api/state',{cache:'no-store'});
-    if(r.ok){ liveBackend=true; $('#edge-health').textContent='LIVE'; $('#cloud-health').textContent='LIVE'; }
+    const r=await fetch('/api/config',{cache:'no-store'});
+    if(!r.ok) return;
+    const cfg=await r.json();
+    liveBackend=true;
+    runtimeConfig=cfg;
+    dashboardMode=cfg.mode || 'interactive';
+    applyRuntimeConfig(cfg);
+    $('#edge-health').textContent='LIVE';
+    $('#cloud-health').textContent='LIVE';
+    if(dashboardMode==='interactive') startStatePolling();
   }catch(_){ /* standalone — scripted demo only */ }
+}
+
+function applyRuntimeConfig(cfg){
+  const rt=cfg.runtime || {};
+  $('#interactive-panel').hidden = dashboardMode!=='interactive';
+  $('#mode-chip').textContent = (dashboardMode || 'interactive').toUpperCase();
+  $('#backend-chip').textContent = `BACKEND ${(cfg.backend || rt.backend || 'kuksa')}`;
+  $('#asr-chip').textContent = `ASR ${(rt.asr_provider || cfg.providers?.asr || 'local_whisper')}`;
+  $('#tts-chip').textContent = `TTS ${(rt.tts_provider || cfg.providers?.tts || 'local_pyttsx3')}`;
+  if(dashboardMode==='interactive'){
+    $('#start-btn').textContent='Enter Cockpit';
+    $('.so-sub').textContent='Interactive Edge ↔ Cloud Voice Cockpit';
+    $('.so-keys').innerHTML='<kbd>Enter</kbd> send &nbsp;·&nbsp; <kbd>Mic</kbd> record &nbsp;·&nbsp; <kbd>R</kbd> reset';
+    $('#assistant-text').textContent="Enter a command or record voice input.";
+  }
+}
+
+function startStatePolling(){
+  if(liveStatePoll) return;
+  pollState();
+  liveStatePoll=setInterval(pollState, 650);
+}
+
+async function pollState(){
+  if(!liveBackend || dashboardMode!=='interactive') return;
+  try{
+    const r=await fetch('/api/state',{cache:'no-store'});
+    if(r.ok) applyLiveState(await r.json());
+  }catch(_){}
+}
+
+function applyLiveState(state){
+  if(!state) return;
+  applyNetworkStatus(state.network_status || {});
+  if(state.current_command?.raw_text) $('#driver-text').textContent=state.current_command.raw_text;
+  const response = state.assistant_response || state.routing_decision?.response;
+  if(response) $('#assistant-text').textContent=response;
+  if(state.vehicle_state) setVehicle(normalizeVehicleState(state.vehicle_state));
+  if(state.routing_decision) renderLiveRouting(state.routing_decision, state.current_command);
+  if(state.statistics) renderLiveStats(state.statistics);
+  if(state.kuksa?.operations) renderBackendOperations(state.kuksa.operations);
+  const status=state.backend_status || state.kuksa?.status || {};
+  if(status.backend) $('#backend-chip').textContent=`BACKEND ${status.backend}${status.connected?'':' SIM'}`;
+}
+
+function normalizeVehicleState(s){
+  return {
+    speed:s.speed,
+    steering:s.steering_angle,
+    temperature:s.temperature,
+    headlights:s.headlights,
+    hazard:s.hazard_lights,
+    doors:s.doors_locked===undefined ? undefined : !s.doors_locked,
+  };
+}
+
+function applyNetworkStatus(n){
+  const connected = n.is_connected !== false;
+  if(!connected){ setNet('offline'); setMood('offline'); return; }
+  const lat = Number(n.latency_ms ?? 50);
+  if(lat > 350 || Number(n.packet_loss ?? 0) > 0.03){ setNet('degraded'); setMood('offline'); return; }
+  if(lat > 100){ setNet('good'); setMood('normal'); return; }
+  setNet('excellent'); setMood('normal');
+}
+
+function renderLiveRouting(decision, command){
+  const route=decision.executed_on || 'edge';
+  const key=`${command?.raw_text || ''}|${route}|${Math.round(decision.latency_ms || 0)}|${decision.response || ''}`;
+  $('#router-intent').textContent=decision.intent || command?.intent || 'intent';
+  $('#rt-route').querySelector('.rtc-v').textContent=route.toUpperCase();
+  $('#rt-route').querySelector('.rtc-v').style.color = route==='edge' ? 'var(--mint)' : 'var(--cloud)';
+  $('#rt-lat').querySelector('.rtc-v').textContent=fmtLat(decision.latency_ms || 0);
+  $('#rt-crit').querySelector('.rtc-v').textContent=command?.criticality || 'normal';
+  $('#rt-fallback').classList.toggle('show', !!decision.fallback_used);
+  $('#branch-edge').classList.toggle('active', route==='edge');
+  $('#branch-cloud').classList.toggle('active', route==='cloud');
+  $('#branch-edge').classList.toggle('dim', route==='cloud');
+  $('#branch-cloud').classList.toggle('dim', route==='edge');
+  if(key!==lastRoutingKey){
+    lastRoutingKey=key;
+    firePkt('#pkt-in');
+    firePkt(route==='edge' ? '#pkt-edge' : '#pkt-cloud');
+    $('#rt-router').classList.add('active');
+    setTimeout(()=>$('#rt-router').classList.remove('active'), 520);
+  }
+}
+
+function renderLiveStats(s){
+  stats.total=s.total_commands || 0;
+  stats.edge=s.edge_executions || 0;
+  stats.cloud=s.cloud_executions || 0;
+  stats.sumLat=(s.avg_latency_ms || 0) * stats.total;
+  renderStats();
+  const success = Math.round((s.success_rate ?? 0) * 100);
+  $('#stat-success').innerHTML = `${success}<small>%</small>`;
+}
+
+function renderBackendOperations(ops){
+  const key=ops.map(o=>`${o.timestamp}:${o.path}:${o.value}`).join('|');
+  if(key===lastOperationsKey) return;
+  lastOperationsKey=key;
+  vssTicker.innerHTML='';
+  ops.slice(0, MAX_VSS).reverse().forEach(op=>{
+    pushVSS({
+      op:op.operation || 'write',
+      path:op.path || 'Vehicle.Unknown',
+      value:op.value ?? '',
+      lat:Number(op.latency_ms || 0),
+      ok:!!op.success,
+    });
+  });
+}
+
+async function sendInteractiveCommand(text){
+  const cleaned=(text || '').trim();
+  if(!cleaned) return;
+  setPhase('thinking'); setOrbStatus('ROUTING');
+  $('#send-command').disabled=true;
+  try{
+    const r=await fetch('/api/command/text',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:cleaned}),
+    });
+    const payload=await r.json();
+    if(!r.ok) throw new Error(payload.error || 'Command failed');
+    applyLiveState(payload.state);
+    $('#command-input').value='';
+    setPhase('idle'); setOrbStatus('READY');
+  }catch(e){
+    $('#assistant-text').textContent=e.message || 'Command failed.';
+    setPhase('idle'); setOrbStatus('ERROR');
+  }finally{
+    $('#send-command').disabled=false;
+    $('#command-input')?.focus();
+  }
+}
+
+async function resetInteractive(){
+  if(!liveBackend || dashboardMode!=='interactive') return;
+  try{
+    const r=await fetch('/api/reset',{method:'POST'});
+    if(r.ok) applyLiveState((await r.json()).state);
+  }catch(_){}
+  $('#driver-text').textContent='—';
+  $('#assistant-text').textContent='Enter a command or record voice input.';
+  setOrbStatus('READY');
+}
+
+$('#command-form')?.addEventListener('submit', e=>{
+  e.preventDefault();
+  sendInteractiveCommand($('#command-input').value);
+});
+$('#reset-live')?.addEventListener('click', resetInteractive);
+
+/* ---------- microphone capture: browser PCM -> WAV upload ---------- */
+let micState={recording:false,stream:null,ctx:null,source:null,processor:null,chunks:[],timer:null};
+
+$('#mic-btn')?.addEventListener('click', ()=>{
+  if(micState.recording) stopMicRecording();
+  else startMicRecording();
+});
+$('#audio-upload-btn')?.addEventListener('click', ()=>$('#audio-file-input')?.click());
+$('#audio-file-input')?.addEventListener('change', async e=>{
+  const file=e.target.files && e.target.files[0];
+  if(!file) return;
+  setPhase('thinking'); setOrbStatus('TRANSCRIBING');
+  await submitAudioBlob(file);
+  e.target.value='';
+});
+
+async function startMicRecording(){
+  try{
+    $('#mic-btn').classList.remove('blocked');
+    micState.stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    micState.ctx=new (window.AudioContext || window.webkitAudioContext)();
+    micState.source=micState.ctx.createMediaStreamSource(micState.stream);
+    micState.processor=micState.ctx.createScriptProcessor(4096,1,1);
+    micState.chunks=[];
+    micState.processor.onaudioprocess=e=>{
+      micState.chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+    };
+    micState.source.connect(micState.processor);
+    micState.processor.connect(micState.ctx.destination);
+    micState.recording=true;
+    $('#mic-btn').classList.add('recording');
+    setPhase('listening'); setOrbStatus('LISTENING');
+    micState.timer=setTimeout(stopMicRecording, 8000);
+  }catch(e){
+    const denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
+    $('#mic-btn').classList.toggle('blocked', denied);
+    $('#assistant-text').textContent = denied
+      ? 'Browser mic is blocked. Trying the server microphone now.'
+      : (e.message || 'Microphone unavailable. Use the upload button or text input.');
+    if(denied){
+      await startServerMicRecording();
+    }else{
+      setPhase('idle');
+      setOrbStatus('MIC ERROR');
+    }
+  }
+}
+
+async function stopMicRecording(){
+  if(!micState.recording) return;
+  clearTimeout(micState.timer);
+  micState.recording=false;
+  $('#mic-btn').classList.remove('recording');
+  setPhase('thinking'); setOrbStatus('TRANSCRIBING');
+  const sampleRate=micState.ctx.sampleRate;
+  micState.processor.disconnect();
+  micState.source.disconnect();
+  micState.stream.getTracks().forEach(t=>t.stop());
+  await micState.ctx.close();
+  const samples=mergeChunks(micState.chunks);
+  const wav=encodeWav(resample(samples, sampleRate, 16000), 16000);
+  await submitAudioBlob(wav);
+}
+
+async function submitAudioBlob(blob){
+  try{
+    const contentType = blob.type || 'audio/wav';
+    const r=await fetch('/api/command/audio',{method:'POST',headers:{'Content-Type':contentType},body:blob});
+    const payload=await r.json();
+    if(!r.ok) throw new Error(payload.error || 'Audio command failed');
+    applyLiveState(payload.state);
+    setPhase('idle'); setOrbStatus('READY');
+  }catch(e){
+    $('#assistant-text').textContent=e.message || 'Audio command failed.';
+    setPhase('idle'); setOrbStatus('ERROR');
+  }
+}
+
+async function startServerMicRecording(){
+  setPhase('listening');
+  setOrbStatus('SERVER MIC');
+  try{
+    const r=await fetch('/api/command/server-audio',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({duration_seconds:4}),
+    });
+    const payload=await r.json();
+    if(!r.ok) throw new Error(payload.error || 'Server microphone failed');
+    applyLiveState(payload.state);
+    setPhase('idle'); setOrbStatus('READY');
+  }catch(e){
+    $('#assistant-text').textContent = `${e.message || 'Server microphone failed.'} Use text input or the upload button.`;
+    setPhase('idle');
+    setOrbStatus('MIC BLOCKED');
+  }
+}
+
+function mergeChunks(chunks){
+  const len=chunks.reduce((n,c)=>n+c.length,0);
+  const out=new Float32Array(len);
+  let off=0;
+  chunks.forEach(c=>{ out.set(c,off); off+=c.length; });
+  return out;
+}
+
+function resample(samples, fromRate, toRate){
+  if(fromRate===toRate) return samples;
+  const ratio=fromRate/toRate;
+  const len=Math.round(samples.length/ratio);
+  const out=new Float32Array(len);
+  for(let i=0;i<len;i++){
+    const pos=i*ratio;
+    const lo=Math.floor(pos), hi=Math.min(lo+1,samples.length-1);
+    out[i]=lerp(samples[lo],samples[hi],pos-lo);
+  }
+  return out;
+}
+
+function encodeWav(samples, sampleRate){
+  const buffer=new ArrayBuffer(44 + samples.length*2);
+  const view=new DataView(buffer);
+  writeStr(view,0,'RIFF'); view.setUint32(4,36+samples.length*2,true);
+  writeStr(view,8,'WAVE'); writeStr(view,12,'fmt ');
+  view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,1,true);
+  view.setUint32(24,sampleRate,true); view.setUint32(28,sampleRate*2,true);
+  view.setUint16(32,2,true); view.setUint16(34,16,true);
+  writeStr(view,36,'data'); view.setUint32(40,samples.length*2,true);
+  let off=44;
+  for(let i=0;i<samples.length;i++,off+=2){
+    const s=clamp(samples[i],-1,1);
+    view.setInt16(off, s<0 ? s*0x8000 : s*0x7fff, true);
+  }
+  return new Blob([view],{type:'audio/wav'});
+}
+
+function writeStr(view, offset, str){
+  for(let i=0;i<str.length;i++) view.setUint8(offset+i,str.charCodeAt(i));
 }
 
 /* ---------- init ---------- */

@@ -30,8 +30,14 @@ def load_config() -> AppConfig:
         SPEECHLESS_BEDROCK_REGION: AWS region for Bedrock
         SPEECHLESS_PING_URL: URL for connectivity checks
         SPEECHLESS_PING_INTERVAL: Connectivity ping interval in seconds
+        SPEECHLESS_BACKEND: Vehicle backend ("kuksa" or "simulated")
         SPEECHLESS_KUKSA_HOST: Kuksa databroker hostname
         SPEECHLESS_KUKSA_PORT: Kuksa databroker gRPC port
+        SPEECHLESS_ASR_PROVIDER: ASR provider ("local_whisper", "lmstudio_whisper", or "aws")
+        SPEECHLESS_ASR_MODEL_NAME: ASR model name for OpenAI-compatible providers
+        SPEECHLESS_LMSTUDIO_ASR_URL: LM Studio Whisper-compatible endpoint URL
+        SPEECHLESS_TTS_PROVIDER: TTS provider ("local_pyttsx3" or "aws")
+        SPEECHLESS_AWS_TTS_VOICE_ID: AWS Polly voice ID
         SPEECHLESS_CRITICAL_HR_THRESHOLD: Heart rate emergency threshold (BPM)
         SPEECHLESS_HR_SAMPLING_INTERVAL: Heart rate sampling interval in seconds
         SPEECHLESS_WHISPER_MODEL_SIZE: Whisper model size for local STT
@@ -64,8 +70,19 @@ def load_config() -> AppConfig:
         ping_interval_seconds=float(
             _get_env("SPEECHLESS_PING_INTERVAL", default="3.0")
         ),
+        backend=_get_env("SPEECHLESS_BACKEND", default="kuksa"),
         kuksa_host=_get_env("SPEECHLESS_KUKSA_HOST", default="localhost"),
         kuksa_port=int(_get_env("SPEECHLESS_KUKSA_PORT", default="55556")),
+        asr_provider=_get_env("SPEECHLESS_ASR_PROVIDER", default="local_whisper"),
+        asr_model_name=_get_env("SPEECHLESS_ASR_MODEL_NAME", default="whisper-1"),
+        lmstudio_asr_url=_get_env(
+            "SPEECHLESS_LMSTUDIO_ASR_URL",
+            "SPEECHLESS_EDGE_LM_URL",
+            "SPEECHLESS_LMSTUDIO_URL",
+            default="http://localhost:1234/v1",
+        ),
+        tts_provider=_get_env("SPEECHLESS_TTS_PROVIDER", default="local_pyttsx3"),
+        aws_tts_voice_id=_get_env("SPEECHLESS_AWS_TTS_VOICE_ID", default="Joanna"),
         critical_hr_threshold=int(
             _get_env("SPEECHLESS_CRITICAL_HR_THRESHOLD", default="180")
         ),

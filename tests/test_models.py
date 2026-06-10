@@ -114,8 +114,14 @@ class TestAppConfig:
         assert config.bedrock_region == "us-east-1"
         assert config.ping_url == "http://connectivitycheck.gstatic.com/generate_204"
         assert config.ping_interval_seconds == 3.0
+        assert config.backend == "kuksa"
         assert config.kuksa_host == "localhost"
-        assert config.kuksa_port == 55555
+        assert config.kuksa_port == 55556
+        assert config.asr_provider == "local_whisper"
+        assert config.asr_model_name == "whisper-1"
+        assert config.lmstudio_asr_url == "http://localhost:1234/v1"
+        assert config.tts_provider == "local_pyttsx3"
+        assert config.aws_tts_voice_id == "Joanna"
         assert config.critical_hr_threshold == 180
         assert config.hr_sampling_interval == 5.0
         assert config.whisper_model_size == "base"
@@ -133,8 +139,9 @@ class TestLoadConfig:
         config = load_config()
         assert config.edge_target == "lmstudio"
         assert config.bedrock_profile == "losrudos"
+        assert config.backend == "kuksa"
         assert config.kuksa_host == "localhost"
-        assert config.kuksa_port == 55555
+        assert config.kuksa_port == 55556
         assert config.ping_url == "http://connectivitycheck.gstatic.com/generate_204"
         assert config.stt_confidence_threshold == 0.7
         assert config.classification_confidence_threshold == 0.6
@@ -146,8 +153,11 @@ class TestLoadConfig:
         monkeypatch.setenv("SPEECHLESS_BEDROCK_PROFILE", "custom-profile")
         monkeypatch.setenv("SPEECHLESS_BEDROCK_MODEL", "anthropic.claude-3-sonnet")
         monkeypatch.setenv("SPEECHLESS_BEDROCK_REGION", "eu-west-1")
+        monkeypatch.setenv("SPEECHLESS_BACKEND", "simulated")
         monkeypatch.setenv("SPEECHLESS_KUKSA_HOST", "192.168.1.100")
         monkeypatch.setenv("SPEECHLESS_KUKSA_PORT", "44444")
+        monkeypatch.setenv("SPEECHLESS_ASR_PROVIDER", "aws")
+        monkeypatch.setenv("SPEECHLESS_TTS_PROVIDER", "aws")
         monkeypatch.setenv("SPEECHLESS_PING_URL", "http://example.com/ping")
         monkeypatch.setenv("SPEECHLESS_PING_INTERVAL", "5.0")
         monkeypatch.setenv("SPEECHLESS_CONFIDENCE_THRESHOLD", "0.8")
@@ -160,8 +170,11 @@ class TestLoadConfig:
         assert config.bedrock_profile == "custom-profile"
         assert config.bedrock_model_id == "anthropic.claude-3-sonnet"
         assert config.bedrock_region == "eu-west-1"
+        assert config.backend == "simulated"
         assert config.kuksa_host == "192.168.1.100"
         assert config.kuksa_port == 44444
+        assert config.asr_provider == "aws"
+        assert config.tts_provider == "aws"
         assert config.ping_url == "http://example.com/ping"
         assert config.ping_interval_seconds == 5.0
         assert config.stt_confidence_threshold == 0.8

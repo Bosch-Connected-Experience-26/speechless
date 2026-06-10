@@ -23,52 +23,99 @@
           <mxGeometry x="40" y="90" width="1000" height="780" as="geometry"/>
         </mxCell>
 
-        <mxCell id="orchestrator" value="PIPELINE ORCHESTRATOR  ·  IDLE → LISTEN → TRANSCRIBE → CLASSIFY → EXECUTE → RESPOND" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#232F3E;strokeColor=#232F3E;fontColor=#FFFFFF;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;arcSize=6;" vertex="1" parent="1">
+        <mxCell id="orchestrator" value="PIPELINE ORCHESTRATOR  ·  IDLE → LISTEN → TRANSCRIBE → CLASSIFY → EXECUTE → RESPOND" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#232F3E;strokeColor=#232F3E;fontColor=#FFFFFF;fontSize=13;fontStyle=1;align=left;verticalAlign=middle;arcSize=6;spacingLeft=56;" vertex="1" parent="1">
           <mxGeometry x="70" y="145" width="940" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="orchestrator-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#FFFFFF;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.step_functions;" vertex="1" parent="1">
+          <mxGeometry x="82" y="154" width="32" height="32" as="geometry"/>
         </mxCell>
 
         <!-- Row 1: Voice pipeline (primary path, numbered) -->
-        <mxCell id="audio-capture" value="&lt;b&gt;① Audio Capture&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;sounddevice · 16 kHz mono PCM&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="audio-capture" value="&lt;b&gt;① Audio Capture&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;sounddevice · 16 kHz mono PCM&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="70" y="215" width="290" height="120" as="geometry"/>
         </mxCell>
-        <mxCell id="speech-engine" value="&lt;b&gt;② Speech Engine&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;faster-whisper · local STT&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="audio-capture-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.client;" vertex="1" parent="1">
+          <mxGeometry x="84" y="255" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="speech-engine" value="&lt;b&gt;② Speech Engine&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;faster-whisper · local STT&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="395" y="215" width="290" height="120" as="geometry"/>
         </mxCell>
-        <mxCell id="command-router" value="&lt;b&gt;③ Command Router&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;keyword classifier · &amp;lt;100 ms&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="speech-engine-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.transcribe;" vertex="1" parent="1">
+          <mxGeometry x="409" y="255" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="command-router" value="&lt;b&gt;③ Command Router&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;keyword classifier · &amp;lt;100 ms&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="720" y="215" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="command-router-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.router;" vertex="1" parent="1">
+          <mxGeometry x="734" y="255" width="40" height="40" as="geometry"/>
         </mxCell>
 
         <!-- Row 2: Understanding & decision -->
-        <mxCell id="intent-parser" value="&lt;b&gt;④ Intent Parser&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;NLU → HVAC / Windows / Doors / Lights&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="intent-parser" value="&lt;b&gt;④ Intent Parser&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;NLU → HVAC / Windows / Doors / Lights&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="70" y="365" width="290" height="120" as="geometry"/>
         </mxCell>
-        <mxCell id="edge-llm" value="&lt;b&gt;Edge LLM Client&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;LM Studio · Jetson TensorRT-LLM&lt;br&gt;(OpenAI-compatible API)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="intent-parser-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lex;" vertex="1" parent="1">
+          <mxGeometry x="84" y="405" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="edge-llm" value="&lt;b&gt;Edge LLM Client&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;LM Studio · Jetson TensorRT-LLM&lt;br&gt;(OpenAI-compatible API)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="395" y="365" width="290" height="120" as="geometry"/>
         </mxCell>
-        <mxCell id="conv-context" value="&lt;b&gt;Conversation Context&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;rolling history · ≥5 turns offline&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="edge-llm-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sagemaker;" vertex="1" parent="1">
+          <mxGeometry x="409" y="405" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="conv-context" value="&lt;b&gt;Conversation Context&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;rolling history · ≥5 turns offline&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="720" y="365" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="conv-context-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.chatbot;" vertex="1" parent="1">
+          <mxGeometry x="734" y="405" width="40" height="40" as="geometry"/>
         </mxCell>
 
         <!-- Row 3: Action & feedback -->
-        <mxCell id="vehicle-controller" value="&lt;b&gt;⑤ Vehicle Controller&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;Kuksa gRPC client · VSS actuation&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="vehicle-controller" value="&lt;b&gt;⑤ Vehicle Controller&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;Kuksa gRPC client · VSS actuation&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="70" y="515" width="290" height="120" as="geometry"/>
         </mxCell>
-        <mxCell id="response-engine" value="&lt;b&gt;⑥ Response Engine&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;pyttsx3 TTS · confirmations &amp;amp; alerts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="vehicle-controller-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.car;" vertex="1" parent="1">
+          <mxGeometry x="84" y="555" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="response-engine" value="&lt;b&gt;⑥ Response Engine&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;pyttsx3 TTS · confirmations &amp;amp; alerts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="395" y="515" width="290" height="120" as="geometry"/>
         </mxCell>
-        <mxCell id="conn-monitor" value="&lt;b&gt;Connectivity Monitor&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;httpx ping · 3 s interval&lt;br&gt;ONLINE ↔ OFFLINE&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="response-engine-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.polly;" vertex="1" parent="1">
+          <mxGeometry x="409" y="555" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="conn-monitor" value="&lt;b&gt;Connectivity Monitor&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;httpx ping · 3 s interval&lt;br&gt;ONLINE ↔ OFFLINE&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="720" y="515" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-monitor-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.internet_alt1;" vertex="1" parent="1">
+          <mxGeometry x="734" y="555" width="40" height="40" as="geometry"/>
         </mxCell>
 
         <!-- Row 4: Vehicle awareness -->
-        <mxCell id="telemetry-reader" value="&lt;b&gt;Telemetry Reader&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;GPS · fuel · heart rate via VSS&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="telemetry-reader" value="&lt;b&gt;Telemetry Reader&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;GPS · fuel · heart rate via VSS&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="70" y="665" width="290" height="120" as="geometry"/>
         </mxCell>
-        <mxCell id="biometric-monitor" value="&lt;b&gt;Biometric Monitor&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;HR ≥ 180 BPM → emergency&lt;br&gt;30 s cancel window&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="telemetry-reader-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.iot_core;" vertex="1" parent="1">
+          <mxGeometry x="84" y="705" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="biometric-monitor" value="&lt;b&gt;Biometric Monitor&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;HR ≥ 180 BPM → emergency&lt;br&gt;30 s cancel window&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="395" y="665" width="290" height="120" as="geometry"/>
         </mxCell>
-        <mxCell id="route-planner" value="&lt;b&gt;Route Planner&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;fuel-aware routing · Haversine&lt;br&gt;multi-constraint&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="biometric-monitor-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.personal_health_dashboard;" vertex="1" parent="1">
+          <mxGeometry x="409" y="705" width="40" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="route-planner" value="&lt;b&gt;Route Planner&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;fuel-aware routing · Haversine&lt;br&gt;multi-constraint&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF3FC;strokeColor=#4A8AC7;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="720" y="665" width="290" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="route-planner-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#4A8AC7;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.route_53;" vertex="1" parent="1">
+          <mxGeometry x="734" y="705" width="40" height="40" as="geometry"/>
         </mxCell>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -89,12 +136,18 @@
           <mxGeometry x="1110" y="155" width="460" height="100" as="geometry"/>
         </mxCell>
 
-        <mxCell id="cloud-stt" value="&lt;b&gt;Cloud STT Fallback&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;OpenAI Whisper API (3rd-party)&lt;br&gt;used when local confidence &amp;lt; 0.7&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#879196;strokeWidth=1.5;dashed=1;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="cloud-stt" value="&lt;b&gt;Cloud STT Fallback&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;OpenAI Whisper API (3rd-party)&lt;br&gt;used when local confidence &amp;lt; 0.7&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#879196;strokeWidth=1.5;dashed=1;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="1110" y="270" width="460" height="85" as="geometry"/>
         </mxCell>
+        <mxCell id="cloud-stt-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#879196;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.transcribe;" vertex="1" parent="1">
+          <mxGeometry x="1124" y="293" width="40" height="40" as="geometry"/>
+        </mxCell>
 
-        <mxCell id="realtime-queries" value="&lt;b&gt;Real-Time Queries&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;Fuel prices (EUR/L) · restaurant availability (3rd-party)&lt;br&gt;in-memory cache fallback&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#879196;strokeWidth=1.5;dashed=1;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="realtime-queries" value="&lt;b&gt;Real-Time Queries&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#54616F&quot;&gt;Fuel prices (EUR/L) · restaurant availability (3rd-party)&lt;br&gt;in-memory cache fallback&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#879196;strokeWidth=1.5;dashed=1;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="1110" y="370" width="460" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="realtime-queries-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#879196;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.internet_alt1;" vertex="1" parent="1">
+          <mxGeometry x="1124" y="400" width="40" height="40" as="geometry"/>
         </mxCell>
 
         <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -104,8 +157,11 @@
           <mxGeometry x="1080" y="510" width="520" height="360" as="geometry"/>
         </mxCell>
 
-        <mxCell id="kuksa-db" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;Kuksa Databroker&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#2E5230&quot;&gt;🐳 Docker · gRPC :55555&lt;br&gt;ghcr.io/eclipse-kuksa/kuksa-databroker:0.4.4&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#43A047;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=center;verticalAlign=middle;fontSize=12;" vertex="1" parent="1">
+        <mxCell id="kuksa-db" value="&lt;b style=&quot;font-size: 13px;&quot;&gt;Kuksa Databroker&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#2E5230&quot;&gt;🐳 Docker · gRPC :55555&lt;br&gt;ghcr.io/eclipse-kuksa/kuksa-databroker:0.4.4&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#43A047;strokeWidth=1.5;arcSize=8;fontColor=#16191F;align=left;verticalAlign=middle;fontSize=12;spacingLeft=68;" vertex="1" parent="1">
           <mxGeometry x="1110" y="575" width="460" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="kuksa-db-icon" value="" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;strokeColor=none;fillColor=#43A047;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.generic_database;" vertex="1" parent="1">
+          <mxGeometry x="1124" y="595" width="40" height="40" as="geometry"/>
         </mxCell>
 
         <mxCell id="vss-signals" value="&lt;font style=&quot;font-size: 11px;&quot; color=&quot;#2E7D32&quot;&gt;&lt;b&gt;VSS Signal Paths (read / write)&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#2E5230&quot;&gt;Vehicle.Cabin.HVAC.Station.Row1.Driver.Temperature&lt;br&gt;Vehicle.Cabin.Door.Row1.DriverSide.{IsLocked, Window.Position}&lt;br&gt;Vehicle.Body.Lights.DirectionIndicator.Left.IsSignaling&lt;br&gt;Vehicle.CurrentLocation.{Latitude, Longitude}&lt;br&gt;Vehicle.Powertrain.FuelSystem.{Level, InstantConsumption}&lt;br&gt;Vehicle.Occupant.Driver.HeartRate&lt;br&gt;Vehicle.Speed&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4FBF5;strokeColor=#A5D6A7;strokeWidth=1;arcSize=4;align=left;verticalAlign=top;spacingTop=8;spacingLeft=12;" vertex="1" parent="1">
@@ -125,18 +181,19 @@
         </mxCell>
 
         <!-- Command Router branches -->
-        <mxCell id="flow-router-intent" value="vehicle_control" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;fontColor=#2E5C8A;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.85;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="command-router" target="intent-parser" parent="1">
+        <mxCell id="flow-router-intent" value="vehicle_control" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;fontColor=#2E5C8A;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.4;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="command-router" target="intent-parser" parent="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="215" y="317"/>
+              <mxPoint x="836" y="345"/>
+              <mxPoint x="215" y="345"/>
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="flow-router-edgellm" value="informational · offline" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;fontColor=#2E5C8A;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="command-router" target="edge-llm" parent="1">
+        <mxCell id="flow-router-edgellm" value="informational · offline" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;fontColor=#2E5C8A;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.6;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="command-router" target="edge-llm" parent="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="865" y="350"/>
-              <mxPoint x="540" y="350"/>
+              <mxPoint x="894" y="355"/>
+              <mxPoint x="540" y="355"/>
             </Array>
           </mxGeometry>
         </mxCell>
@@ -156,11 +213,12 @@
         <mxCell id="flow-edgellm-response" value="answer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#4A8AC7;strokeWidth=2;fontColor=#2E5C8A;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="edge-llm" target="response-engine" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="flow-bedrock-response" value="answer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF9900;strokeWidth=2;fontColor=#B36B00;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.85;exitDx=0;exitDy=0;entryX=1;entryY=0.3;entryDx=0;entryDy=0;" edge="1" source="bedrock-client" target="response-engine" parent="1">
+        <mxCell id="flow-bedrock-response" value="answer" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF9900;strokeWidth=2;fontColor=#B36B00;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.85;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" source="bedrock-client" target="response-engine" parent="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1060" y="240"/>
-              <mxPoint x="1060" y="548"/>
+              <mxPoint x="1050" y="240"/>
+              <mxPoint x="1050" y="655"/>
+              <mxPoint x="540" y="655"/>
             </Array>
           </mxGeometry>
         </mxCell>
@@ -178,8 +236,8 @@
         <mxCell id="flow-route-kuksa" value="VSS read" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#43A047;strokeWidth=2;fontColor=#2E7D32;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.6;entryDx=0;entryDy=0;" edge="1" source="route-planner" target="kuksa-db" parent="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1060" y="725"/>
-              <mxPoint x="1060" y="623"/>
+              <mxPoint x="1065" y="725"/>
+              <mxPoint x="1065" y="623"/>
             </Array>
           </mxGeometry>
         </mxCell>
@@ -224,16 +282,16 @@
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="598" y="350"/>
-              <mxPoint x="1060" y="350"/>
-              <mxPoint x="1060" y="295"/>
+              <mxPoint x="1055" y="350"/>
+              <mxPoint x="1055" y="295"/>
             </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="flow-route-realtime" value="fuel price lookup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#FF9900;strokeWidth=1.5;dashed=1;dashPattern=6 4;fontColor=#B36B00;fontSize=10;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.2;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;" edge="1" source="route-planner" target="realtime-queries" parent="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1060" y="689"/>
-              <mxPoint x="1060" y="450"/>
+              <mxPoint x="1070" y="689"/>
+              <mxPoint x="1070" y="450"/>
             </Array>
           </mxGeometry>
         </mxCell>

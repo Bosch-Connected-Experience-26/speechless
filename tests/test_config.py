@@ -18,8 +18,11 @@ class TestLoadConfig:
             config = load_config()
         assert config.edge_target == "lmstudio"
         assert config.bedrock_profile == "losrudos"
+        assert config.backend == "kuksa"
         assert config.kuksa_host == "localhost"
-        assert config.kuksa_port == 55555
+        assert config.kuksa_port == 55556
+        assert config.asr_provider == "local_whisper"
+        assert config.tts_provider == "local_pyttsx3"
         assert config.ping_url == "http://connectivitycheck.gstatic.com/generate_204"
         assert config.ping_interval_seconds == 3.0
         assert config.stt_confidence_threshold == 0.7
@@ -44,6 +47,23 @@ class TestLoadConfig:
             config = load_config()
         assert config.kuksa_host == "192.168.1.100"
         assert config.kuksa_port == 12345
+
+    def test_backend_and_provider_settings_from_env(self):
+        with patch.dict(os.environ, {
+            "SPEECHLESS_BACKEND": "simulated",
+            "SPEECHLESS_ASR_PROVIDER": "lmstudio_whisper",
+            "SPEECHLESS_ASR_MODEL_NAME": "whisper-large-v3",
+            "SPEECHLESS_LMSTUDIO_ASR_URL": "http://localhost:4321/v1",
+            "SPEECHLESS_TTS_PROVIDER": "aws",
+            "SPEECHLESS_AWS_TTS_VOICE_ID": "Matthew",
+        }):
+            config = load_config()
+        assert config.backend == "simulated"
+        assert config.asr_provider == "lmstudio_whisper"
+        assert config.asr_model_name == "whisper-large-v3"
+        assert config.lmstudio_asr_url == "http://localhost:4321/v1"
+        assert config.tts_provider == "aws"
+        assert config.aws_tts_voice_id == "Matthew"
 
     def test_ping_url_from_env(self):
         with patch.dict(os.environ, {"SPEECHLESS_PING_URL": "http://custom-check.local/ping"}):

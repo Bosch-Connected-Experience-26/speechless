@@ -42,7 +42,7 @@ class KuksaStatus:
 
     connected: bool = False
     host: str = "localhost"
-    port: int = 55555
+    port: int = 55556
     last_check: Optional[str] = None
     operations_count: int = 0
     errors_count: int = 0

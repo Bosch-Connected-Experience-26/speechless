@@ -3,7 +3,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 
 class PipelineState(Enum):
@@ -31,7 +30,7 @@ class ConversationTurn:
 
     role: str  # "user" or "assistant"
     content: str
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
 
 
 @dataclass
@@ -44,13 +43,13 @@ class PipelineContext:
 
     state: PipelineState = PipelineState.IDLE
     mode: ProcessingMode = ProcessingMode.ONLINE
-    transcription: Optional[str] = None
+    transcription: str | None = None
     confidence: float = 0.0
-    classification: Optional[str] = None
-    routing: Optional[str] = None
-    response_text: Optional[str] = None
-    error: Optional[str] = None
-    start_time: Optional[datetime] = None
+    classification: str | None = None
+    routing: str | None = None
+    response_text: str | None = None
+    error: str | None = None
+    start_time: datetime | None = None
     conversation_history: list[ConversationTurn] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
 
@@ -75,8 +74,16 @@ class AppConfig:
     ping_interval_seconds: float = 3.0
 
     # Kuksa
+    backend: str = "kuksa"
     kuksa_host: str = "localhost"
     kuksa_port: int = 55556
+
+    # ASR/TTS providers
+    asr_provider: str = "local_whisper"
+    asr_model_name: str = "whisper-1"
+    lmstudio_asr_url: str = "http://localhost:1234/v1"
+    tts_provider: str = "local_pyttsx3"
+    aws_tts_voice_id: str = "Joanna"
 
     # Biometric
     critical_hr_threshold: int = 180

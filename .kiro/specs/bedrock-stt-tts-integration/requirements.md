@@ -56,7 +56,7 @@ This feature integrates AWS Bedrock-based Speech-to-Text (Amazon Transcribe) and
 1. WHEN the Pipeline routes a command to "edge" during the demo, THE Edge_LLM SHALL send a real chat completion request to LM Studio at the endpoint configured via SPEECHLESS_EDGE_LM_URL environment variable (default: http://localhost:1234/v1)
 2. WHEN the Edge_LLM builds a request, THE Edge_LLM SHALL include a system prompt message with role "system" that identifies the assistant as an in-vehicle voice assistant
 3. WHILE the system is in OFFLINE mode with an active multi-turn conversation, WHEN a new user message is received, THE Edge_LLM SHALL include up to 20 prior conversation turns (oldest trimmed first when exceeding the limit) in the chat completion request to maintain coherence
-4. IF LM Studio is not running, does not respond within 10 seconds, returns an HTTP error, or returns a malformed response, THEN THE Edge_LLM SHALL return a response with success set to false and an error message indicating the nature of the failure
+4. IF LM Studio is not running, does not respond within 10 seconds, returns an HTTP error, or returns a malformed response, THEN THE Edge_LLM SHALL return a response with success set to false and an error message indicating the nature of the failure. IF LM Studio responds successfully but the response content is valid and usable, THE Edge_LLM SHALL NOT return success=false regardless of the content semantics
 5. THE Edge_LLM SHALL use the model name configured via SPEECHLESS_EDGE_MODEL_NAME environment variable, defaulting to "local-model" when the variable is not set
 6. WHEN the Edge_LLM receives a successful response from LM Studio, THE Edge_LLM SHALL return the generated text content from the first completion choice with success set to true
 
@@ -67,10 +67,10 @@ This feature integrates AWS Bedrock-based Speech-to-Text (Amazon Transcribe) and
 #### Acceptance Criteria
 
 1. WHEN the Pipeline routes a command to "cloud" during the demo, THE Bedrock_Client SHALL send a real converse API request to the configured model (default: anthropic.claude-3-haiku-20240307-v1:0) in us-east-1
-2. IF vehicle telemetry (latitude, longitude, fuel level, connectivity state) is available from the TelemetryReader, THEN THE Bedrock_Client SHALL include a system prompt containing those telemetry values as vehicle context in the converse API request
-3. IF one or more telemetry fields are unavailable (None), THEN THE Bedrock_Client SHALL include only the available fields in the system prompt and omit the unavailable ones
+2. IF vehicle telemetry (latitude, longitude, fuel level, connectivity state) is available from the TelemetryReader with at least one non-None field, THEN THE Bedrock_Client SHALL include a system prompt containing those telemetry values as vehicle context in the converse API request. IF all telemetry fields are None, THEN THE Bedrock_Client SHALL omit the system prompt entirely
+3. IF one or more telemetry fields are unavailable (None) but at least one field has a value, THEN THE Bedrock_Client SHALL include only the available fields in the system prompt and omit the unavailable ones
 4. WHEN transitioning from OFFLINE to ONLINE, THE Bedrock_Client SHALL include the injected offline conversation messages (from inject_context) as preceding turns in the converse API request, ordered chronologically before the new user message
-5. WHEN the Bedrock_Client has sent a converse API request that includes injected offline context and the request succeeds, THE Bedrock_Client SHALL clear the injected context so subsequent requests do not repeat it. IF the request fails or times out, THEN THE Bedrock_Client SHALL retain the injected context for the next attempt
+5. WHEN the Bedrock_Client has sent a converse API request that includes injected offline context and the request succeeds, THE Bedrock_Client SHALL clear the injected context so subsequent requests do not repeat it. IF the request fails, times out, or has an ambiguous outcome, THEN THE Bedrock_Client SHALL retain the injected context for the next attempt
 6. IF Bedrock returns an error or the request exceeds the 5-second read timeout, THEN THE Bedrock_Client SHALL return a BedrockResponse with success=False and an error_message indicating the failure type and cause
 7. THE Bedrock_Client SHALL authenticate using the "losrudos" AWS CLI profile via boto3 Session with a connect timeout of 3 seconds
 
@@ -81,11 +81,11 @@ This feature integrates AWS Bedrock-based Speech-to-Text (Amazon Transcribe) and
 #### Acceptance Criteria
 
 1. WHEN the Demo_Runner receives an Audio_Input file path, THE Pipeline SHALL read the WAV file (16kHz, mono, 16-bit PCM) and pass audio samples to the STT module for transcription within 500 milliseconds of file read initiation
-2. IF the Audio_Input file path is missing, unreadable, or not in the expected WAV format (16kHz, mono, 16-bit PCM), THEN THE Pipeline SHALL log an error indicating the file path and failure reason, skip the current scene, and continue to the next scene in the demo script
+2. IF the Audio_Input file path is missing, unreadable, or not in the expected WAV format (16kHz, mono, 16-bit PCM), THEN THE Pipeline SHALL log an error indicating the file path and failure reason, skip the current scene, and continue to the next scene in the demo script. THE Demo_Runner SHALL also log errors for any other scene failure (STT timeout, LLM error, network issues) but SHALL only skip scenes for file-related problems
 3. WHEN the STT module returns a transcription, THE Pipeline SHALL route the text through classification, LLM processing (edge or cloud based on Connectivity_Monitor state), and TTS output in sequence, completing the full chain before processing the next scene
 4. THE Demo_Runner SHALL support executing all 10 scenes from docs/demo_script.md in order using pre-recorded Audio_Input files, reporting a final summary that includes the count of scenes passed (TTS output produced) and scenes failed (error or timeout)
 5. WHEN a scene requires a connectivity transition, THE Demo_Runner SHALL toggle the Connectivity_Monitor state to the required value and wait until the Pipeline confirms the new processing mode before processing the next Audio_Input
-6. THE Demo_Runner SHALL log each pipeline step with timing metrics in milliseconds (STT latency, classification latency, LLM latency, TTS latency, total end-to-end latency) and flag any scene that exceeds its performance target: vehicle control less than 1000ms end-to-end, informational less than 5000ms, edge LLM less than 3000ms, classification less than 100ms
+6. THE Demo_Runner SHALL log each pipeline step with timing metrics in milliseconds (STT latency, classification latency, LLM latency, TTS latency, total end-to-end latency) and flag any scene that exceeds its performance target: vehicle control less than 1000ms end-to-end, informational less than 5000ms, edge LLM less than 3000ms, classification less than 100ms. IF timing metric logging itself fails, THE Demo_Runner SHALL continue execution without blocking the pipeline
 
 ### Requirement 6: Unified AWS Session Management
 
