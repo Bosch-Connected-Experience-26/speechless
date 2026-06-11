@@ -33,9 +33,10 @@ def load_config() -> AppConfig:
         SPEECHLESS_BACKEND: Vehicle backend ("kuksa" or "simulated")
         SPEECHLESS_KUKSA_HOST: Kuksa databroker hostname
         SPEECHLESS_KUKSA_PORT: Kuksa databroker gRPC port
-        SPEECHLESS_ASR_PROVIDER: ASR provider ("local_whisper", "lmstudio_whisper", or "aws")
+        SPEECHLESS_ASR_PROVIDER: ASR provider ("local_whisper", "mlx_whisper", "lmstudio_whisper", or "aws")
         SPEECHLESS_ASR_MODEL_NAME: ASR model name for OpenAI-compatible providers
         SPEECHLESS_LMSTUDIO_ASR_URL: LM Studio Whisper-compatible endpoint URL
+        SPEECHLESS_MLX_WHISPER_MODEL: MLX Whisper model repo/path
         SPEECHLESS_TTS_PROVIDER: TTS provider ("local_pyttsx3" or "aws")
         SPEECHLESS_AWS_TTS_VOICE_ID: AWS Polly voice ID
         SPEECHLESS_CRITICAL_HR_THRESHOLD: Heart rate emergency threshold (BPM)
@@ -80,6 +81,10 @@ def load_config() -> AppConfig:
             "SPEECHLESS_EDGE_LM_URL",
             "SPEECHLESS_LMSTUDIO_URL",
             default="http://localhost:1234/v1",
+        ),
+        mlx_whisper_model=_get_env(
+            "SPEECHLESS_MLX_WHISPER_MODEL",
+            default="mlx-community/whisper-base",
         ),
         tts_provider=_get_env("SPEECHLESS_TTS_PROVIDER", default="local_pyttsx3"),
         aws_tts_voice_id=_get_env("SPEECHLESS_AWS_TTS_VOICE_ID", default="Joanna"),

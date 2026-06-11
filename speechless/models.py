@@ -82,6 +82,7 @@ class AppConfig:
     asr_provider: str = "local_whisper"
     asr_model_name: str = "whisper-1"
     lmstudio_asr_url: str = "http://localhost:1234/v1"
+    mlx_whisper_model: str = "mlx-community/whisper-base"
     tts_provider: str = "local_pyttsx3"
     aws_tts_voice_id: str = "Joanna"
 

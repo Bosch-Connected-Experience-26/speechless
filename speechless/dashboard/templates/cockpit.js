@@ -58,12 +58,31 @@ function buildSpeedo(){
   tg.innerHTML = svg;
 }
 let fillLen=0;
+let driveModeState='park';
+let parkShiftTimer=null;
+function renderDriveMode(v){
+  const moving = target.speed > 1 || v > 1;
+  const gear=$('.dm-gear');
+  const mode=$('.dm-eco');
+  if(moving) driveModeState='drive';
+  if(driveModeState==='neutral'){
+    gear.textContent='N';
+    mode.textContent='NEUTRAL';
+  }else if(driveModeState==='drive'){
+    gear.textContent='D';
+    mode.textContent=moving?'DRIVE':'READY';
+  }else{
+    gear.textContent='P';
+    mode.textContent='PARK';
+  }
+}
 function renderSpeed(v){
   const g=speedToG(v);
   $('#speed-needle').style.transform = `rotate(${g}deg)`;
   $('#speed-fill').style.strokeDashoffset = fillLen*(1 - clamp(v,0,V_MAX)/V_MAX);
   const num=$('#speed-num'); num.textContent=Math.round(v);
   num.className = 'speed-num' + (v>=160?' crit':v>=100?' warn':'');
+  renderDriveMode(v);
 }
 
 /* ============================================================
@@ -292,8 +311,14 @@ function setVehicle(s){
   }
 }
 function brakeSnap(){
+  clearTimeout(parkShiftTimer);
+  driveModeState='neutral';
   target.speed=0; disp.speed=0; renderSpeed(0);
   setVehicle({brake:true, hazard:true});
+  parkShiftTimer=setTimeout(()=>{
+    driveModeState='park';
+    renderSpeed(disp.speed);
+  }, 1100);
   cockpit.animate(
     [{filter:'brightness(1.6) saturate(1.2)'},{filter:'brightness(1)'}],
     {duration:420, easing:'ease-out'}
@@ -313,6 +338,13 @@ function setFuel(step){
   $('#fuel-pct').textContent=step.pct+'%';
   const f=$('#fuel-fill'); f.style.width=step.pct+'%'; f.classList.toggle('low', !!step.low);
   $('#fuel-range').textContent=step.range;
+  const card=$('#tele-fuel');
+  card.classList.toggle('fuel-low', !!step.low);
+  card.classList.remove('fuel-cue');
+  if(step.low){
+    void card.offsetWidth;
+    card.classList.add('fuel-cue');
+  }
 }
 function setAlert(step){
   const b=$('#alert-banner');
@@ -326,7 +358,12 @@ function setNav(step){
   if(step.next!==undefined) $('#nav-next').textContent=step.next;
   if(step.prog!==undefined) setMapProgress(step.prog);
 }
-function litPOI(id){ const m={food:'#poi-food',gas:'#poi-gas',hosp:'#poi-hosp'}; $(m[id])?.classList.add('lit'); }
+function setPOI(step){
+  const m={food:'#poi-food',gas:'#poi-gas',hosp:'#poi-hosp'};
+  const el=$(m[step.id]);
+  if(!el) return;
+  el.classList.toggle('lit', step.lit !== false);
+}
 function setTunnel(on){ $('#tunnel-banner').classList.toggle('show', on); }
 
 /* ============================================================
@@ -365,7 +402,7 @@ async function apply(step){
       setPhase('idle'); setOrbStatus('READY');
       break;
     case 'vss': pushVSS(step); break;
-    case 'poi': litPOI(step.id); break;
+    case 'poi': setPOI(step); break;
     case 'map': setNav(step); break;
     case 'tunnel': setTunnel(step.on); break;
     case 'hr': setHR(step); break;
@@ -384,7 +421,7 @@ async function apply(step){
    RUNNER (play / pause / skip / reset)
    ============================================================ */
 const SCEN = window.SPEECHLESS_SCENARIO;
-const DWELL_SCALE = 1.8;   // baseline read/narration pacing
+const DWELL_SCALE = 1.4;   // baseline pacing, kept near 2:30 with the resume-driving beat
 const ASSISTANT_REPLY_PAUSE = 1000;
 const CLOUD_ROUTE_PAUSE = 2600;
 const CLOUD_REPLY_PAUSE = 1600;
@@ -463,8 +500,10 @@ function reset(){
   lastRouteMode=null;
   if(skipResolve){ skipResolve(); } if(resumeResolve){ resumeResolve(); resumeResolve=null; }
   clearTimeout(sleepTimer);
+  clearTimeout(parkShiftTimer);
   // state
   Object.assign(stats,{total:0,edge:0,cloud:0,sumLat:0}); renderStats();
+  driveModeState='park';
   target.speed=0; target.steer=0; disp.speed=0; disp.steer=0;
   setMood('normal'); setPhase('idle');
   setNet('excellent'); setTunnel(false); setAlert({on:false});

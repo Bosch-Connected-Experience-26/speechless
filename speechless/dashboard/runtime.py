@@ -8,7 +8,7 @@ from speechless.models import AppConfig
 
 VALID_DASHBOARD_MODES = {"interactive", "demo"}
 VALID_BACKENDS = {"kuksa", "simulated"}
-VALID_ASR_PROVIDERS = {"local_whisper", "lmstudio_whisper", "aws"}
+VALID_ASR_PROVIDERS = {"local_whisper", "mlx_whisper", "lmstudio_whisper", "aws"}
 VALID_TTS_PROVIDERS = {"local_pyttsx3", "aws"}
 
 

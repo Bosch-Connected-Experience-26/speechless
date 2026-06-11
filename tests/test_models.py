@@ -120,6 +120,7 @@ class TestAppConfig:
         assert config.asr_provider == "local_whisper"
         assert config.asr_model_name == "whisper-1"
         assert config.lmstudio_asr_url == "http://localhost:1234/v1"
+        assert config.mlx_whisper_model == "mlx-community/whisper-base"
         assert config.tts_provider == "local_pyttsx3"
         assert config.aws_tts_voice_id == "Joanna"
         assert config.critical_hr_threshold == 180

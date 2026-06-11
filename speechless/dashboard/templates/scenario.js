@@ -123,10 +123,23 @@ window.SPEECHLESS_SCENARIO = [
   { t:'vss', op:'read', path:'Vehicle.Occupant.Row1.DriverSide.HeartRate', value:'78', lat:7.0, ok:true },
   { t:'alert', on:false },
   { t:'mood', m:'normal', d:200 },
-  { t:'assistant', text:"Heart rate normalized to 78 BPM. Emergency cancelled — resuming route to Pasta Perfetto via Shell A9.", d:1800 },
+  { t:'assistant', text:"Heart rate normalized to 78 BPM. Emergency cancelled — resuming route to Pasta Perfetto via Shell A9.", d:900 },
 
-  /* ---------- SCENE 15 · Wrap-up ---------- */
-  { t:'scene', n:15, name:'Demo Complete' },
+  /* ---------- SCENE 15 · Route resume ---------- */
+  { t:'scene', n:15, name:'Route Resume · Cruising' },
+  { t:'poi', id:'hosp', lit:false },
+  { t:'poi', id:'gas', lit:true },
+  { t:'map', dest:'Pasta Perfetto', eta:26, dist:18.7, next:'Shell A9 · refuel', prog:0.70, d:250 },
+  { t:'route', to:'edge', intent:'vehicle.resume_cruise', cls:'CONTROL RECOVERY', crit:'safety', lat:16, d:80 },
+  { t:'vehicle', set:{ brake:false, hazard:false, steering:12, speed:14, headlights:true }, d:650 },
+  { t:'vss', op:'write', path:'Vehicle.ADAS.EBA.IsActive', value:'false', lat:7.0, ok:true },
+  { t:'vehicle', set:{ steering:0, speed:32 }, d:1000 },
+  { t:'vss', op:'write', path:'Vehicle.Speed', value:'32', lat:8.4, ok:true },
+  { t:'map', prog:0.74, dist:18.3, next:'Shell A9 · refuel', d:200 },
+  { t:'assistant', text:"Route resumed. Hazards off — slowly cruising toward Shell A9 before continuing to Pasta Perfetto.", d:900 },
+
+  /* ---------- SCENE 16 · Wrap-up ---------- */
+  { t:'scene', n:16, name:'Demo Complete' },
   { t:'phase', p:'idle' },
   { t:'orbstatus', text:'ALL SYSTEMS NOMINAL' },
   { t:'assistant', text:"That's the full hybrid loop — edge for safety, cloud for intelligence, seamless across the gap.", d:600 },

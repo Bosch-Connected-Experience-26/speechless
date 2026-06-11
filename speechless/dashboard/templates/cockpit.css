@@ -202,7 +202,9 @@ body{
 .vp-title{font-size:14px;letter-spacing:.05em;color:var(--dim);font-weight:700}
 .vp-live{font-size:13.5px;letter-spacing:.04em;color:var(--mint);font-weight:700}
 .carview{position:relative;flex:1;display:grid;place-items:center;overflow:hidden;border-radius:10px;min-height:0;
-  background:radial-gradient(70% 60% at 50% 50%,rgba(95,214,232,.06),transparent 70%)}
+  background:
+    radial-gradient(58% 52% at 50% 47%,rgba(95,214,232,.12),transparent 68%),
+    radial-gradient(46% 60% at 50% 54%,rgba(91,243,204,.05),transparent 72%)}
 .adas-rings{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
 .ar{position:absolute;border:1px solid rgba(95,214,232,.16);border-radius:50%}
 .ar1{width:160px;height:250px}
@@ -217,18 +219,31 @@ body{
 .beams.on{opacity:1}
 .beam{fill:url(#beamGrad)}
 .beams.on .beam{filter:drop-shadow(0 -6px 16px rgba(255,243,176,.4))}
-.wheel{fill:#0a0d13;stroke:rgba(255,255,255,.12);stroke-width:1.2;transition:transform .4s cubic-bezier(.4,1.2,.5,1)}
-#wfl{transform-origin:42px 86px}#wfr{transform-origin:158px 86px}
-.body-base{fill:url(#carBody);stroke:rgba(120,160,210,.3);stroke-width:1.5}
-.body-sheen{fill:none;stroke:rgba(255,255,255,.08);stroke-width:1}
-.glass{fill:rgba(95,214,232,.22);stroke:rgba(95,214,232,.4);stroke-width:1}
-.roof{fill:url(#carRoof);stroke:rgba(255,255,255,.1);stroke-width:1}
+.car-shadow{fill:rgba(2,6,12,.56);filter:blur(7px)}
+.sensor-field{fill:url(#carHalo);opacity:.55;animation:sensorBreath 4s ease-in-out infinite}
+@keyframes sensorBreath{50%{opacity:.82;transform:scale(1.025);transform-origin:100px 150px}}
+.wheel-pod{transition:transform .45s cubic-bezier(.2,.9,.2,1);transform-box:fill-box;transform-origin:center}
+.wheel{fill:#070b11;stroke:rgba(197,223,238,.22);stroke-width:1.2}
+.tire-line{stroke:rgba(95,214,232,.16);stroke-width:1.2;stroke-linecap:round}
+.body-base{fill:url(#carBody);stroke:rgba(150,197,226,.44);stroke-width:1.4;filter:drop-shadow(0 0 14px rgba(95,214,232,.18))}
+.body-shoulder{fill:rgba(14,22,33,.36);stroke:url(#carSideTrim);stroke-width:1.1}
+.body-shoulder.left{filter:drop-shadow(-5px 0 8px rgba(95,214,232,.08))}
+.body-shoulder.right{filter:drop-shadow(5px 0 8px rgba(95,214,232,.08))}
+.hood-panel{fill:rgba(170,226,238,.08);stroke:rgba(197,223,238,.17);stroke-width:1}
+.body-sheen{fill:none;stroke:rgba(229,250,255,.18);stroke-width:1.1;stroke-linecap:round}
+.glass{fill:rgba(95,214,232,.2);stroke:rgba(160,235,245,.48);stroke-width:1}
+.windshield{fill:rgba(95,214,232,.26);filter:drop-shadow(0 0 9px rgba(95,214,232,.17))}
+.roof{fill:url(#carRoof);stroke:rgba(190,242,248,.3);stroke-width:1;filter:drop-shadow(0 0 10px rgba(95,214,232,.18))}
+.rear{fill:rgba(95,214,232,.17)}
+.center-spine{fill:none;stroke:url(#carSpine);stroke-width:1.2;stroke-linecap:round;opacity:.55}
+.trim-line{fill:none;stroke:rgba(91,243,204,.2);stroke-width:1;stroke-linecap:round}
+.sensor-node{fill:var(--mint);opacity:.78;filter:drop-shadow(0 0 5px rgba(91,243,204,.7))}
 .door-seam{stroke:var(--mint);stroke-width:2.5;stroke-linecap:round;opacity:0;transition:opacity .3s}
 .door-seam.unlocked{opacity:1;stroke:var(--amber)}
-.headlight{fill:#3a4252;transition:fill .3s,filter .3s}
-.headlight.on{fill:#fff3b0;filter:drop-shadow(0 0 8px #ffe680)}
-.brakelight{fill:#3a1f22;transition:fill .2s,filter .2s}
-.brakelight.on{fill:#ff3b3b;filter:drop-shadow(0 0 9px #ff3b3b)}
+.headlight{fill:#465263;stroke:rgba(255,255,255,.16);stroke-width:.8;transition:fill .3s,filter .3s}
+.headlight.on{fill:#fff3b0;filter:drop-shadow(0 0 10px #ffe680)}
+.brakelight{fill:#44252b;stroke:rgba(255,255,255,.1);stroke-width:.7;transition:fill .2s,filter .2s}
+.brakelight.on{fill:#ff4d63;filter:drop-shadow(0 0 10px #ff4d63)}
 .hazard{fill:#3a3326;opacity:.3}
 .hazard.on{fill:#ffa42a;opacity:1;filter:drop-shadow(0 0 7px #ffa42a);animation:hzBlink .55s steps(1) infinite}
 @keyframes hzBlink{50%{opacity:.15;filter:none}}
@@ -401,6 +416,31 @@ body{
 .tele-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .tele-card{padding:12px 14px}
 .tele-wide{grid-column:1/-1}
+#tele-fuel{position:relative;overflow:hidden;transition:border-color .35s,box-shadow .35s,background .35s}
+#tele-fuel::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;
+  background:radial-gradient(85% 130% at 20% 50%,rgba(255,180,84,.2),transparent 58%);
+  transition:opacity .35s;
+}
+#tele-fuel.fuel-low{
+  border-color:rgba(255,180,84,.65);
+  background:radial-gradient(100% 120% at 18% 55%,rgba(255,180,84,.12),transparent 62%),linear-gradient(160deg,var(--panel),rgba(255,255,255,.012));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 28px rgba(255,180,84,.22),0 10px 30px rgba(0,0,0,.25);
+}
+#tele-fuel.fuel-low::before{opacity:1}
+#tele-fuel.fuel-cue{animation:fuelCue 1.15s ease-out 2}
+#tele-fuel.fuel-low .tc-lab{color:var(--amber)}
+#tele-fuel.fuel-low .tc-lab::after{
+  content:"LOW";margin-left:8px;padding:2px 6px;border-radius:5px;
+  background:rgba(255,180,84,.16);border:1px solid rgba(255,180,84,.42);
+  color:var(--amber);font-size:11px;letter-spacing:.06em;vertical-align:1px;
+}
+#tele-fuel.fuel-low .tc-val{color:var(--amber)}
+#tele-fuel.fuel-low #fuel-range{color:var(--amber)}
+@keyframes fuelCue{
+  0%{box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 0 rgba(255,180,84,.55),0 10px 30px rgba(0,0,0,.25)}
+  100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 18px rgba(255,180,84,0),0 10px 30px rgba(0,0,0,.25)}
+}
 .tc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .tc-lab{font-size:14px;letter-spacing:.04em;color:var(--faint);font-weight:700}
 .tc-val{font-family:var(--ff-num);font-size:20px;font-weight:600}
@@ -411,6 +451,7 @@ body{
 .fuel-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--amber),var(--gold));width:15%;transition:width .8s}
 .fuel-fill.low{background:linear-gradient(90deg,var(--danger),var(--amber))}
 .fuel-reserve{position:absolute;top:0;left:20%;width:1.5px;height:100%;background:rgba(255,255,255,.3)}
+#tele-fuel.fuel-low .fuel-reserve{background:rgba(255,180,84,.75);box-shadow:0 0 10px rgba(255,180,84,.65)}
 .ecg{width:100%;height:46px;display:block}
 .ecg-line{fill:none;stroke:var(--mint);stroke-width:2;filter:drop-shadow(0 0 4px var(--mint));
   stroke-linejoin:round;stroke-linecap:round}

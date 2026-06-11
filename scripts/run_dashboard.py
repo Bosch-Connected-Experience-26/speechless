@@ -7,6 +7,7 @@ Usage:
     uv run python scripts/run_dashboard.py
     uv run python scripts/run_dashboard.py --demo
     uv run python scripts/run_dashboard.py --backend simulated
+    uv run python scripts/run_dashboard.py --backend kuksa --asr-provider mlx_whisper
     # Then open http://localhost:5001 in your browser
 """
 

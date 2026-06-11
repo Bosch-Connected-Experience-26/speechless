@@ -12,15 +12,15 @@ Property 10: Exponential backoff retry timing — delay = base_delay × multipli
 max 3 attempts.
 """
 
+import asyncio
 import re
 
-from hypothesis import given, settings, assume
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from speechless.edge.intent_parser import Action, VehicleIntent, VehicleSystem
-from speechless.edge.vehicle_controller import VehicleController, VSSSignal
+from speechless.edge.vehicle_controller import VehicleController
 from speechless.utils.retry import RetryConfig, compute_backoff_delay
-
 
 # Strategy for valid VehicleIntents
 valid_intents = st.sampled_from([
@@ -73,6 +73,29 @@ class TestIntentToVSSSignalMapping:
         signal = controller.intent_to_signal(intent)
         assert signal is not None
         assert signal.type in ("int32", "uint8", "float", "boolean", "string")
+
+    def test_actuate_wraps_values_as_kuksa_datapoints(self):
+        """Kuksa writes use Datapoint wrappers required by kuksa-client."""
+        captured = {}
+
+        class FakeKuksaClient:
+            def set_current_values(self, values):
+                captured.update(values)
+
+        controller = VehicleController()
+        controller._connected = True
+        controller._client = FakeKuksaClient()
+        intent = VehicleIntent(
+            system=VehicleSystem.DOORS,
+            action=Action.LOCK,
+            parameters={},
+        )
+
+        result = asyncio.run(controller.actuate(intent))
+
+        assert result.success is True
+        datapoint = captured["Vehicle.Cabin.Door.Row1.DriverSide.IsLocked"]
+        assert datapoint.value is True
 
 
 class TestErrorMessages:

@@ -54,6 +54,7 @@ class TestLoadConfig:
             "SPEECHLESS_ASR_PROVIDER": "lmstudio_whisper",
             "SPEECHLESS_ASR_MODEL_NAME": "whisper-large-v3",
             "SPEECHLESS_LMSTUDIO_ASR_URL": "http://localhost:4321/v1",
+            "SPEECHLESS_MLX_WHISPER_MODEL": "mlx-community/whisper-small",
             "SPEECHLESS_TTS_PROVIDER": "aws",
             "SPEECHLESS_AWS_TTS_VOICE_ID": "Matthew",
         }):
@@ -62,6 +63,7 @@ class TestLoadConfig:
         assert config.asr_provider == "lmstudio_whisper"
         assert config.asr_model_name == "whisper-large-v3"
         assert config.lmstudio_asr_url == "http://localhost:4321/v1"
+        assert config.mlx_whisper_model == "mlx-community/whisper-small"
         assert config.tts_provider == "aws"
         assert config.aws_tts_voice_id == "Matthew"
 

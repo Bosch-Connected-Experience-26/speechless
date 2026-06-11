@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
-from speechless.edge.intent_parser import Action, VehicleIntent, VehicleSystem
+from speechless.edge.intent_parser import Action, VehicleIntent
 from speechless.utils.retry import RetryConfig, compute_backoff_delay
 
 
@@ -30,7 +30,7 @@ class ActuationResult:
 
     success: bool
     signal: VSSSignal
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 class VehicleController:
@@ -89,7 +89,7 @@ class VehicleController:
         self._connected = False
         self._retry_config = RetryConfig(max_retries=3, base_delay=1.0, multiplier=2.0)
 
-    def intent_to_signal(self, intent: VehicleIntent) -> Optional[VSSSignal]:
+    def intent_to_signal(self, intent: VehicleIntent) -> VSSSignal | None:
         """Map a VehicleIntent to the corresponding VSS signal.
 
         Args:
@@ -173,7 +173,6 @@ class VehicleController:
         Returns:
             True if connection established, False after exhausting retries.
         """
-        last_error: Optional[Exception] = None
         for attempt in range(self._retry_config.max_retries + 1):
             try:
                 # kuksa-client connection (lazy import to avoid hard dependency in tests)
@@ -183,8 +182,7 @@ class VehicleController:
                 self._client.connect()
                 self._connected = True
                 return True
-            except Exception as e:
-                last_error = e
+            except Exception:
                 if attempt < self._retry_config.max_retries:
                     delay = compute_backoff_delay(attempt, self._retry_config)
                     time.sleep(delay)
@@ -219,10 +217,18 @@ class VehicleController:
                         error_message="Failed to connect to Kuksa databroker",
                     )
 
-            # Write the signal value via Kuksa gRPC
-            self._client.set_current_values({signal.path: signal.value})
+            # kuksa-client v0.5 expects Datapoint wrappers, not raw primitives.
+            self._client.set_current_values({
+                signal.path: self._to_kuksa_datapoint(signal.value)
+            })
             return ActuationResult(success=True, signal=signal)
 
         except Exception as e:
             error_msg = self.generate_error_message(e, intent)
             return ActuationResult(success=False, signal=signal, error_message=error_msg)
+
+    @staticmethod
+    def _to_kuksa_datapoint(value: Any):
+        from kuksa_client.grpc import Datapoint  # type: ignore[import-untyped]
+
+        return Datapoint(value=value)

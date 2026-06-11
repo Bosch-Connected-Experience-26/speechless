@@ -12,6 +12,7 @@ The dashboard polls /api/state every 500ms to update the UI.
 from __future__ import annotations
 
 import asyncio
+import os
 import time
 from datetime import datetime
 from pathlib import Path
@@ -157,6 +158,10 @@ def _require_asr() -> DashboardASR:
     return _asr
 
 
+def _env_enabled(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def create_app(
     *,
     mode: str = "interactive",
@@ -175,6 +180,15 @@ def create_app(
         template_folder=str(template_dir),
         static_folder=str(template_dir),
     )
+
+    @app.after_request
+    def add_no_cache_headers(response):
+        """Prevent stale dashboard assets in the in-app browser."""
+        if request.path == "/" or request.path.startswith("/api/") or request.path.endswith((".css", ".js")):
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
 
     app_config = config or load_config()
     _runtime = runtime or DashboardRuntime.from_config(
@@ -228,6 +242,28 @@ def create_app(
             "mode": _runtime.mode if _runtime else "interactive",
             "backend": _vehicle_backend.name if _vehicle_backend else None,
             "providers": _dashboard_state["providers"],
+            "models": {
+                "asr": {
+                    "provider": _runtime.asr_provider if _runtime else app_config.asr_provider,
+                    "mlx_whisper_model": app_config.mlx_whisper_model,
+                    "lmstudio_url": app_config.lmstudio_asr_url,
+                    "openai_compatible_model": app_config.asr_model_name,
+                },
+                "bedrock": {
+                    "enabled": _env_enabled("SPEECHLESS_BEDROCK_ENABLED"),
+                    "profile": app_config.bedrock_profile,
+                    "region": app_config.bedrock_region,
+                    "model_id": app_config.bedrock_model_id,
+                },
+                "edge_llm": {
+                    "enabled": _env_enabled("SPEECHLESS_EDGE_LLM_ENABLED"),
+                    "target": app_config.edge_target,
+                    "url": app_config.edge_lm_url
+                    if app_config.edge_target == "lmstudio"
+                    else app_config.jetson_url,
+                    "model_name": app_config.edge_model_name,
+                },
+            },
         })
 
     @app.route("/api/state")

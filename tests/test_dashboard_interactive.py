@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import sys
+from types import SimpleNamespace
+
 import numpy as np
 import pytest
 
@@ -22,6 +25,10 @@ class TestDashboardCLI:
         assert args.demo is True
         assert args.backend == "simulated"
 
+    def test_mlx_whisper_asr_provider_is_supported(self):
+        args = parse_args(["--asr-provider", "mlx_whisper"])
+        assert args.asr_provider == "mlx_whisper"
+
     def test_kuksa_flag_is_not_supported(self):
         with pytest.raises(SystemExit):
             parse_args(["--kuksa"])
@@ -38,6 +45,8 @@ class TestDashboardAppModes:
         assert payload["mode"] == "interactive"
         assert payload["backend"] == "simulated"
         assert payload["providers"]["asr"] == "local_whisper"
+        assert payload["models"]["asr"]["mlx_whisper_model"] == "mlx-community/whisper-base"
+        assert payload["models"]["bedrock"]["profile"] == "losrudos"
 
     def test_interactive_mode_blocks_start_demo(self):
         app = create_app(config=AppConfig(), mode="interactive", backend="simulated")
@@ -110,6 +119,78 @@ class TestInteractiveCommands:
         assert response.status_code == 200
         assert payload["transcription"]["text"] == "Turn on the lights"
         assert payload["updates"]["routing_decision"]["executed_on"] == "edge"
+
+    def test_asr_rejects_silent_audio_before_transcription(self):
+        asr = DashboardASR(AppConfig(), provider="local_whisper")
+        wav_bytes = asr.samples_to_wav(np.zeros(16000, dtype=np.float32), 16000)
+
+        result = asr.transcribe_wav(wav_bytes)
+
+        assert result.text == ""
+        assert result.error_message == "No clear speech detected. Try speaking closer to the microphone."
+
+    def test_asr_rejects_common_no_speech_hallucination(self):
+        result = ASRProviderResult(
+            text="That's what you said, weren't you?",
+            confidence=0.95,
+            source="local",
+        )
+
+        filtered = DashboardASR._reject_hallucination(result)
+
+        assert filtered.text == ""
+        assert filtered.error_message == "No clear speech detected. Try again with a direct command."
+
+    def test_asr_rejects_low_confidence_transcription(self):
+        asr = DashboardASR(
+            AppConfig(stt_confidence_threshold=0.7),
+            provider="local_whisper",
+        )
+        result = ASRProviderResult(
+            text="unclear background phrase",
+            confidence=0.3,
+            source="local",
+        )
+
+        filtered = asr._validate_transcription(result)
+
+        assert filtered.text == ""
+        assert filtered.error_message == "Speech confidence was too low. Try again with a direct command."
+
+    def test_mlx_whisper_transcription_uses_configured_model(self, monkeypatch):
+        calls = {}
+
+        def fake_transcribe(audio, **kwargs):
+            calls["audio_shape"] = audio.shape
+            calls["kwargs"] = kwargs
+            return {
+                "text": "Lock the doors",
+                "segments": [
+                    {
+                        "avg_logprob": -0.05,
+                        "no_speech_prob": 0.1,
+                    }
+                ],
+            }
+
+        monkeypatch.setitem(
+            sys.modules,
+            "mlx_whisper",
+            SimpleNamespace(transcribe=fake_transcribe),
+        )
+        asr = DashboardASR(
+            AppConfig(mlx_whisper_model="mlx-community/whisper-small"),
+            provider="mlx_whisper",
+        )
+
+        result = asr._transcribe_mlx(np.ones(16000, dtype=np.float32) * 0.05)
+
+        assert result is not None
+        assert result.text == "Lock the doors"
+        assert result.source == "mlx_whisper"
+        assert result.confidence > 0.7
+        assert calls["audio_shape"] == (16000,)
+        assert calls["kwargs"]["path_or_hf_repo"] == "mlx-community/whisper-small"
 
     def test_server_audio_command_records_and_transcribes(self, monkeypatch):
         class FakeSegment:

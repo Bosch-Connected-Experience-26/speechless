@@ -10,16 +10,13 @@ The dashboard shows real VSS paths being actuated in real-time,
 proving the system talks to a real automotive data layer.
 """
 
-from __future__ import annotations
-
-import asyncio
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from speechless.edge.intent_parser import VehicleIntent
-from speechless.edge.vehicle_controller import VSSSignal, VehicleController
+from speechless.edge.vehicle_controller import VehicleController
 
 
 @dataclass
@@ -33,7 +30,7 @@ class VSSOperation:
     operation: str  # "write" or "read"
     success: bool
     latency_ms: float
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass
@@ -43,7 +40,7 @@ class KuksaStatus:
     connected: bool = False
     host: str = "localhost"
     port: int = 55556
-    last_check: Optional[str] = None
+    last_check: str | None = None
     operations_count: int = 0
     errors_count: int = 0
 
@@ -217,7 +214,7 @@ class KuksaBridge:
             try:
                 if self._controller._client:
                     values = self._controller._client.get_current_values([path])
-                    value = values.get(path)
+                    value = self._unwrap_datapoint(values.get(path))
                     self._telemetry_cache[name] = value
                     latency = (time.perf_counter() - start) * 1000
                     op = VSSOperation(
@@ -234,6 +231,10 @@ class KuksaBridge:
                 pass  # Graceful — use cached or simulated
 
         return dict(self._telemetry_cache) if self._telemetry_cache else self._simulated_telemetry()
+
+    @staticmethod
+    def _unwrap_datapoint(value: Any) -> Any:
+        return getattr(value, "value", value)
 
     def try_reconnect(self) -> bool:
         """Attempt to reconnect to Kuksa (non-blocking check)."""
